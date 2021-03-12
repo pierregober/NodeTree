@@ -18,27 +18,15 @@
 // these entries are used for simple usage statistics
 //----------------------------------------------------------------------
 function logUsage() {
-  //var debug = 1;
-  //if(debug) {
-  //    console.log(this);
-  //}
-  //    var pathname = window.location.pathname;
   var pathname = window.location.pathname;
   var listURL = window.location.href;
   var listname = "UsageLog";
-  /*if (debug) {
-        if (window.location.pathname.toLowerCase().endsWith("/_layouts/15/start.aspx")) {
-            console.log("startup detected!! -->" + pathname);
-            alert("startup!! -->" + pathname);
-        }
-    }*/
   //Get browser type
   //Added by IMEF IMO - Pierre Gober CTR - 20210305
   var browserType = checkBrowser();
   addToUsageLog(pathname, listURL, listname, browserType);
 }
 function addToUsageLog(pathname, listURL, listname, browserType) {
-  //var debug = 1;
   //-----------------------------------------------
   // --- Set data to be added
   //-----------------------------------------------

@@ -1,4 +1,5 @@
 function formatUsageLog(cb) {
+  console.log("hit1");
   var siteurl = _spPageContextInfo.siteAbsoluteUrl;
 
   $.ajax({
@@ -111,9 +112,5 @@ function reduceData(data) {
     }
     return acc;
   }, {});
-
-  //console.log("Tree Data:",masterArr[0]);
   return masterArr;
-
-  //console.log("filterBrowserType Data:", filterBrowserType);
 }
