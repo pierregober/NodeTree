@@ -1,5 +1,4 @@
 function formatUsageLog(cb) {
-  console.log("hit1");
   var siteurl = _spPageContextInfo.siteAbsoluteUrl;
 
   $.ajax({
@@ -29,6 +28,10 @@ function reduceData(data) {
   var masterArr = [];
   var filteredArr = [];
   data.results.forEach(function (props, idx) {
+    //convert if a html special char is detected
+    if (props.pathname.indexOf("%") > -1) {
+      props.pathname = decodeURIComponent(props.pathname);
+    }
     //check the last character of the pathname is "/" and removes it
     if (props.pathname.charAt(props.pathname.length - 1) === "/") {
       props.pathname = props.pathname.substring(0, props.pathname.length - 1);
@@ -73,9 +76,10 @@ function reduceData(data) {
     }, {});
 
     arr.forEach(function (el) {
-      // for the first level
-      if (el.parent === null) {
+      // for the first level is null aka obj
+      if (typeof el.parent === "object") {
         root = el;
+        delete root.parent;
         return;
       }
       // Use our mapping to locate the parent element in our data array
