@@ -123,6 +123,8 @@ function createNodeTree() {
       expandAll(tree_root);
       outer_update(tree_root);
 
+      console.log("event data onSelect:", e);
+
       searchField = "d.name";
       searchText = e.params.args.data.text;
       firstCall = true;
@@ -133,7 +135,14 @@ function createNodeTree() {
     });
     //Select2 Clearing
     $("#searchName").on("select2:clearing", function (e) {
-      console.log("hit:", e);
+      console.log("event data onClear:", e);
+
+      searchField = null;
+      searchText = null;
+      clearAll(tree_root);
+      expandAll(tree_root);
+      outer_update(tree_root);
+      console.log("revised 0");
     });
     function cb(error, props) {
       if (error) {
@@ -230,8 +239,8 @@ function createNodeTree() {
   function nodeToolTip(d) {
     html = '<a href="' + d.directory_url + '">' + d.display_name + "</a>";
     lines = 1;
-    if (d.job_title) {
-      html += "<br/>" + d.job_title;
+    if (d.count) {
+      html += "<br/>" + d.count;
       lines += 1;
     }
     if (d.department) {
@@ -551,7 +560,12 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
+          console.log("add tooltip");
           tooltipInfo = nodeToolTip(d);
+          //pierre added this
+          // d.display_name = "Placeholder Display Name";
+          // d.url = "Placeholder Url";
+          // d.department = "Placeholder Dept";
           if (d.display_name) {
             div.transition().duration(200).style("opacity", 0.9);
             div
@@ -559,7 +573,13 @@ function createNodeTree() {
               .style("left", d3.event.pageX + 20 + "px")
               .style("top", d3.event.pageY - 5 + "px");
           }
+        })
+        .on("mouseleave", function (d) {
+          console.log("remove tooltip");
+          //selecting the element by id
         });
+
+      //add a mouse leave event
 
       nodeEnter
         .append("text")
@@ -748,26 +768,12 @@ function createNodeTree() {
           text: item,
         });
       });
-    select2Data
-      .sort(function (a, b) {
-        if (a > b) return 1; // sort
-        if (a < b) return -1;
-        return 0;
-      })
-      .filter(function (item, i, ar) {
-        return ar.indexOf(item) === i;
-      }) // remove duplicate items
-      .filter(function (item, i, ar) {
-        select2DataObject.push({
-          id: i,
-          text: item,
-        });
-      });
     $("#searchName").select2({
       data: select2DataObject,
       containerCssClass: "search",
-      placeholder: "Search for a name...",
+      placeholder: "Search this tree",
       allowClear: true,
+      debug: true,
     });
   }
 }

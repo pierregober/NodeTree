@@ -82,6 +82,13 @@ ul.select2-results {
   max-height: 100px;
 }
 
+.select2-container:focus {
+  outline: none !important;
+}
+.select2-selection:focus {
+  outline: none !important;
+}
+
 .select2-container,
 .select2-drop,
 .select2-search {
@@ -94,6 +101,10 @@ ul.select2-results {
 }
 .select2-search input:focus {
   outline: none;
+}
+
+.select2-selection__clear {
+  font-weight: 900;
 }
 
 #block_container {
