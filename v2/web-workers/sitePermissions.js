@@ -1,12 +1,13 @@
 var allSites = [];
 var allSitesPermissions = [];
+var workerValues = {};
+//make shorter pierre
 var worker = new Worker(
   "https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/worker.js"
 );
 
 function initGetSubsite() {
   var siteurl = _spPageContextInfo.siteAbsoluteUrl;
-
   $.ajax({
     url: siteurl + "/_api/web/webinfos?$select=ServerRelativeUrl,Title",
     method: "GET",
@@ -18,26 +19,13 @@ function initGetSubsite() {
     success: function (data) {
       console.log("data before the workers:", data);
       //add addEventListener to worker
-      worker.addEventListener("message", function (e) {
-        console.log(e.data);
-      });
-      var test = {};
-
+      worker.addEventListener("message", function (e) {});
       data.d.results.map(function (props) {
-        test.requestDigest = $("#__REQUESTDIGEST").val();
-        test.url = props.ServerRelativeUrl;
-        //possible cb for data coming back
-        // function cb(error, item){
-        //   if(error){
-        //     console.log(error)
-        //   }
-        // }
-        worker.postMessage(test);
-        //Old way
-        //allSites.push(props);
-        //getSubSites(props.ServerRelativeUrl, props.Title);
+        //push the parent to the collector
+        allSites.push(props);
+        workerGetSubSites(props);
       });
-      getPermissions();
+      //getPermissions();
     },
     error: function (error) {
       console.log("Error retrieving UsageLog: " + JSON.stringify(error));
@@ -46,39 +34,32 @@ function initGetSubsite() {
 }
 initGetSubsite();
 
-//Recursion to get subsites additonal sites
-function getSubSites(SubSiteUrl, SubSiteTitle) {
-  $.ajax({
-    url:
-      "https://intelshare.intelink.gov" +
-      SubSiteUrl +
-      "/_api/web/webinfos?$select=ServerRelativeUrl,Title",
-    method: "GET",
-    headers: {
-      Accept: "application/json; odata=verbose",
-    },
-    success: function (subsites) {
-      //get rid of empty arrays
-      if (subsites.d.results.length > 0) {
-        //break down an array for the collector
-        if (subsites.d.results.length >= 1) {
-          subsites.d.results.forEach(function (site, index) {
-            allSites.push(site);
-          });
-        } else {
-          allSites.push(subsites.d.results);
-        }
+function workerGetSubSites(props) {
+  //spawn a worker
+  workerValues.requestDigest = $("#__REQUESTDIGEST").val();
+  workerValues.url = props.ServerRelativeUrl;
+  worker.postMessage(workerValues);
+  //get worker results
+  worker.onmessage = function (e) {
+    console.log("heres the event:", e.data, "\n allsites: ", allSites);
+    //get rid of empty arrays
+    if (e.data.length > 0) {
+      //break down an array for the collector
+      if (e.data.length >= 1) {
+        e.data.forEach(function (site) {
+          //add parent to collector
+          allSites.push(site);
+          //spawn new worker
+          workerValues.requestDigest = $("#__REQUESTDIGEST").val();
+          workerValues.url = site.ServerRelativeUrl;
+          worker.postMessage(workerValues);
+        });
+      } else {
+        allSites.push(e.data);
       }
-      subsites.d.results.map(function (props) {
-        getSubSites(props.ServerRelativeUrl, props.Title);
-      });
-    },
-    error: function (error) {
-      console.log("Error retrieving subsite: " + JSON.stringify(error));
-    },
-  });
+    }
+  };
 }
-
 function getPermissions() {
   allSites.map(function (props, index) {
     var siteKey = props.ServerRelativeUrl.toLowerCase();

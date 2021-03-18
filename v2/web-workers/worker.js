@@ -22,7 +22,7 @@ self.addEventListener("message", function (e) {
       })
       .then(function (data) {
         var sites = data.d.results;
-        console.log(sites);
+        self.postMessage(sites);
       })
       .catch(function (e) {
         self.postMessage(e + "test");
