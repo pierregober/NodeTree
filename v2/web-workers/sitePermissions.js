@@ -1,6 +1,8 @@
 var allSites = [];
 var allSitesPermissions = [];
-var worker = new Worker("worker.js");
+var worker = new Worker(
+  "https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/worker.js"
+);
 
 function initGetSubsite() {
   var siteurl = _spPageContextInfo.siteAbsoluteUrl;
@@ -14,13 +16,25 @@ function initGetSubsite() {
       "X-RequestDigest": $("#__REQUESTDIGEST").val(),
     },
     success: function (data) {
+      console.log("data before the workers:", data);
+      //add addEventListener to worker
+      worker.addEventListener("message", function (e) {
+        console.log(e.data);
+      });
+      var test = {};
+
       data.d.results.map(function (props) {
-        allSites.push(props);
-        //create new worker
-        worker.addEventListener("message", function (e) {
-          console.log(e.data);
-        });
-        worker.postMessage("marco");
+        test.requestDigest = $("#__REQUESTDIGEST").val();
+        test.url = props.ServerRelativeUrl;
+        //possible cb for data coming back
+        // function cb(error, item){
+        //   if(error){
+        //     console.log(error)
+        //   }
+        // }
+        worker.postMessage(test);
+        //Old way
+        //allSites.push(props);
         //getSubSites(props.ServerRelativeUrl, props.Title);
       });
       getPermissions();
@@ -62,7 +76,6 @@ function getSubSites(SubSiteUrl, SubSiteTitle) {
     error: function (error) {
       console.log("Error retrieving subsite: " + JSON.stringify(error));
     },
-    async: false,
   });
 }
 
