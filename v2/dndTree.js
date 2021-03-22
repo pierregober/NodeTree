@@ -1,6 +1,8 @@
 //Load supporting scripts
 
 var scripts = [
+  "sitePermissions.js",
+  "worker.js",
   "nodeTreeV2/vendors/jquery.js",
   "nodeTree/formatUsageLog.js",
   "nodeTreeV2/vendors/d3.v3.min.js",
@@ -75,14 +77,14 @@ var links = [
 
   // removing the spacer for the webparts
   // removes the SCRIPT EDITOR
-  if (
-    document.getElementsByClassName("ms-core-tableNoSpace ms-webpartPage-root")
-  ) {
-    var removeSpace = document.getElementsByClassName(
-      "ms-core-tableNoSpace ms-webpartPage-root"
-    );
-    removeSpace[0].remove();
-  }
+  // if (
+  //   document.getElementsByClassName("ms-core-tableNoSpace ms-webpartPage-root")
+  // ) {
+  //   var removeSpace = document.getElementsByClassName(
+  //     "ms-core-tableNoSpace ms-webpartPage-root"
+  //   );
+  //   removeSpace[0].remove();
+  // }
 })();
 
 function createNodeTree() {
@@ -123,8 +125,6 @@ function createNodeTree() {
       expandAll(tree_root);
       outer_update(tree_root);
 
-      console.log("event data onSelect:", e);
-
       searchField = "d.name";
       searchText = e.params.args.data.text;
       firstCall = true;
@@ -144,6 +144,7 @@ function createNodeTree() {
       outer_update(tree_root);
       console.log("revised 0");
     });
+    //callback to get treeData
     function cb(error, props) {
       if (error) {
         console.log(error);
@@ -151,7 +152,7 @@ function createNodeTree() {
       }
       draw_tree(null, props[0]);
     }
-    formatUsageLog(cb);
+    getTreeData(cb);
   });
 
   function close_modal() {
@@ -237,7 +238,7 @@ function createNodeTree() {
   }
 
   function nodeToolTip(d) {
-    html = '<a href="' + d.directory_url + '">' + d.display_name + "</a>";
+    html = '<a href="' + d.name + '">' + d.display_name + "</a>";
     lines = 1;
     if (d.count) {
       html += "<br/>" + d.count;
@@ -560,12 +561,8 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          console.log("add tooltip");
+          // console.log("add tooltip");
           tooltipInfo = nodeToolTip(d);
-          //pierre added this
-          // d.display_name = "Placeholder Display Name";
-          // d.url = "Placeholder Url";
-          // d.department = "Placeholder Dept";
           if (d.display_name) {
             div.transition().duration(200).style("opacity", 0.9);
             div
@@ -575,7 +572,7 @@ function createNodeTree() {
           }
         })
         .on("mouseleave", function (d) {
-          console.log("remove tooltip");
+          // console.log("remove tooltip");
           //selecting the element by id
         });
 
@@ -668,24 +665,18 @@ function createNodeTree() {
         .insert("path", "g")
         .attr("class", "link")
         .attr("stroke-width", function (d) {
-          if (d.target.count > 2000) {
-            return "14";
-          } else if (d.target.count > 1500) {
+          if (d.target.count > 50) {
             return "12";
-          } else if (d.target.count > 1000) {
-            return "10";
-          } else if (d.target.count > 500) {
+          } else if (d.target.count > 40) {
             return "8";
-          } else if (d.target.count > 250) {
+          } else if (d.target.count > 30) {
             return "6";
-          } else if (d.target.count > 200) {
+          } else if (d.target.count > 20) {
             return "4";
-          } else if (d.target.count > 100) {
+          } else if (d.target.count > 10) {
             return "2";
-          } else if (d.target.count > 50) {
-            return "1";
           } else {
-            return ".5";
+            return "1";
           }
         })
         .attr("d", function (d) {

@@ -1,6 +1,7 @@
 //wrap in a iffe to avoid making globally avialable variables.
 // "use strict";
-(function () {
+
+function getTreeData(cb) {
   var allSitesPermissions = [];
   //make shorter pierre
   var workerUrl =
@@ -33,8 +34,7 @@
     //TESTING you must change
     //will need to format the data after the last permission makes it
     if (allSitesPermissions.length === 53) {
-      console.log("allSitesPermissions:", allSitesPermissions);
-      reduceData(allSitesPermissions);
+      reduceData(cb, allSitesPermissions);
     }
   };
-})();
+}
