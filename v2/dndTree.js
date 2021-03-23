@@ -578,13 +578,13 @@ function createNodeTree() {
           tooltipMainContainer.id = "tooltipMainCont";
 
           var trafficContainer = document.createElement("div");
-          trafficContainer.id = "trafficCont";
+          trafficContainer.id = "tooltipChildCont";
 
           var groupContainer = document.createElement("div");
-          groupContainer.id = "groupCont";
+          groupContainer.id = "tooltipChildCont";
 
           var peopleContainer = document.createElement("div");
-          peopleContainer.id = "peopleCont";
+          peopleContainer.id = "tooltipChildCont";
 
           //append the child div to parent
 
@@ -619,6 +619,7 @@ function createNodeTree() {
           toolTipButton.id = "toolTipBtn";
           var toolTipButtonLink = document.createElement("a");
           toolTipButtonLink.href = d.path;
+          toolTipButtonLink.id = "toolTipBtnLink";
           toolTipButtonLink.innerText = "Go to site";
           toolTipButton.appendChild(toolTipButtonLink);
 
@@ -628,6 +629,7 @@ function createNodeTree() {
           tooltipMainContainer.appendChild(peopleContainer);
           tooltipMainContainer.appendChild(toolTipButton);
 
+          //append the d3 tooltip div
           $(".node_tooltip").append(tooltipMainContainer);
 
           $("#toolTipBtn").click(function () {
@@ -638,6 +640,12 @@ function createNodeTree() {
           div
             .style("left", d3.event.pageX + 33 + "px")
             .style("top", d3.event.pageY - 124 + "px");
+        })
+        .on("mouseout", function () {
+          //work around should lookinto this more
+          $(".node_tooltip").empty();
+          div.transition().duration(1).style("opacity", 1e-6);
+          //removeing our options
         });
 
       //add a mouse leave event
