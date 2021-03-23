@@ -44,12 +44,11 @@
 div.node_tooltip {
   position: absolute;
   text-align: center;
-  width: 180px;
   padding: 2px;
   font: 12px sans-serif;
   background: lightsteelblue;
   border: 0px;
-  border-radius: 8px;
+  border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
   padding: 5px;
@@ -70,19 +69,21 @@ div.node_tooltip a:active {
 } /* active links    */
 
 #toolTipBtn {
-  width: 100%;
   background-color: #3949ab;
-  border-radius: 5px;
-  padding: 2px;
+  border-radius: 3px;
   color: aliceblue;
+  margin-top: 10px;
+  padding: 5px;
 }
 
 #toolTipBtn:hover {
   background-color: #1b2b8d;
 }
 
-.tooltipCont {
-  width: 33%;
+#tooltipCont {
+}
+#tooltipContCount {
+  font-size: 35pt;
 }
 
 .found {

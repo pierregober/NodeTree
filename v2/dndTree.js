@@ -570,33 +570,70 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          console.log("node target:", d);
-
           //tooltipInfo = nodeToolTip(d);
-
           div.transition().duration(100).style("opacity", 0.9);
 
-          div.append("div").text(d.count).attr("class", "tooltipCont");
-          div.append("div").text(d.groups.length).attr("class", "tooltipCont");
-          div.append("div").text("9000").attr("class", "tooltipCont");
+          //create my containers
+          var tooltipMainContainer = document.createElement("div");
+          tooltipMainContainer.id = "tooltipMainCont";
 
-          div.append("div").text("Traffic").attr("class", "tooltipCont");
-          div.append("div").text("Groups").attr("class", "tooltipCont");
-          div.append("div").text("People").attr("class", "tooltipCont");
+          var trafficContainer = document.createElement("div");
+          trafficContainer.id = "trafficCont";
 
-          div
-            .append("div")
-            .text("Go to " + d.name)
-            .attr("id", "toolTipBtn")
-            .append("a")
-            .attr("href", d.path);
+          var groupContainer = document.createElement("div");
+          groupContainer.id = "groupCont";
+
+          var peopleContainer = document.createElement("div");
+          peopleContainer.id = "peopleCont";
+
+          //append the child div to parent
+
+          var siteCount = document.createElement("div");
+          siteCount.innerText = d.count;
+          siteCount.id = "tooltipContCount";
+          var siteTitle = document.createElement("div");
+          siteTitle.innerText = "Traffic";
+          siteTitle.id = "tooltipCont";
+          trafficContainer.appendChild(siteCount);
+          trafficContainer.appendChild(siteTitle);
+
+          var groupCount = document.createElement("div");
+          groupCount.innerText = d.groups.length;
+          groupCount.id = "tooltipContCount";
+          var groupTitle = document.createElement("div");
+          groupTitle.innerText = "Groups";
+          groupTitle.id = "tooltipCont";
+          groupContainer.appendChild(groupCount);
+          groupContainer.appendChild(groupTitle);
+
+          var peopleCount = document.createElement("div");
+          peopleCount.innerText = d.peopleCount.length; // placehodler pierre needs to replace this
+          peopleCount.id = "tooltipContCount";
+          var peopleTitle = document.createElement("div");
+          peopleTitle.innerText = "People";
+          peopleTitle.id = "tooltipCont";
+          peopleContainer.appendChild(peopleCount);
+          peopleContainer.appendChild(peopleTitle);
+
+          var toolTipButton = document.createElement("div");
+          toolTipButton.id = "toolTipBtn";
+          var toolTipButtonLink = document.createElement("a");
+          toolTipButtonLink.href = d.path;
+          toolTipButtonLink.innerText = "Go to site";
+          toolTipButton.appendChild(toolTipButtonLink);
+
+          //append the containers to the parent selement
+          tooltipMainContainer.appendChild(trafficContainer);
+          tooltipMainContainer.appendChild(groupContainer);
+          tooltipMainContainer.appendChild(peopleContainer);
+          tooltipMainContainer.appendChild(toolTipButton);
+
+          $(".node_tooltip").append(tooltipMainContainer);
 
           $("#toolTipBtn").click(function () {
             var link = $(this).attr("href");
             $("#toolTipBtn").load(link);
           });
-
-          console.log("d3.event: ", d3.event);
 
           div
             .style("left", d3.event.pageX + 33 + "px")

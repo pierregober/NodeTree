@@ -24,10 +24,11 @@
 function reduceData(cb, data) {
   var location = "";
   var groups = [];
-  var poepleCount = "";
+  var peopleCount = [];
   var root = null;
   var newArr = null;
   var masterArr = [];
+  var test = null;
   data.forEach(function (props, idx) {
     location = props.pathname;
 
@@ -54,6 +55,20 @@ function reduceData(cb, data) {
     //grab the groups
     groups = props.groups;
 
+    // get the number of people in the groups
+    //filter out by person
+    peopleCount = groups.reduce(function (acc, props) {
+      if (acc.length === 0) {
+        acc.push(props.members);
+      }
+      props.members.map(function (person, index) {
+        if (acc.indexOf(person) === -1) {
+          acc.push(person);
+        }
+      });
+      return acc;
+    }, []);
+
     //format the pathname
     var lastItem = "";
     newArr = props.pathname.reduce(function (acc, path, index) {
@@ -69,6 +84,7 @@ function reduceData(cb, data) {
             parent: lastItem,
             count: 1,
             groups: groups,
+            peopleCount: peopleCount,
             path: location,
           });
           lastItem = path;
