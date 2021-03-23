@@ -237,21 +237,28 @@ function createNodeTree() {
     } else if (d.children) d.children.forEach(expandAll);
   }
 
-  function nodeToolTip(d) {
-    html = '<a href="' + d.name + '">' + d.display_name + "</a>";
-    lines = 1;
-    if (d.count) {
-      html += "<br/>" + d.count;
-      lines += 1;
-    }
-    if (d.department) {
-      html += "<br/>" + d.department;
-      lines += 1;
-    }
-    return { html: html, lines: lines };
-  }
+  // function nodeToolTip(d) {
+  //   //resturcture to have divs and felx
+  //
+  //   html = '<a href="' + d.path + '">' + d.name + "</a>";
+  //   lines = 1;
+  //   if (d.count) {
+  //     html += "<br/>" + d.count;
+  //     lines += 1;
+  //   }
+  //   if (d.groups) {
+  //     html += "<br/>" + d.groups.length;
+  //     lines += 1;
+  //   }
+  //   return { html: html, lines: lines };
+  // }
 
   function draw_tree(error, treeData) {
+    //for the nodeToolTip
+    var siteCount = "";
+    var groupCount = "";
+    var peopleCount = "";
+
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -437,10 +444,12 @@ function createNodeTree() {
 
     var overCircle = function (d) {
       selectedNode = d;
+      console.log("overCircle: ", selectedNode);
       updateTempConnector();
     };
     var outCircle = function (d) {
       selectedNode = null;
+      console.log("outCircle: ", selectedNode);
       updateTempConnector();
     };
 
@@ -561,19 +570,37 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          // console.log("add tooltip");
-          tooltipInfo = nodeToolTip(d);
-          if (d.display_name) {
-            div.transition().duration(200).style("opacity", 0.9);
-            div
-              .html(tooltipInfo.html)
-              .style("left", d3.event.pageX + 20 + "px")
-              .style("top", d3.event.pageY - 5 + "px");
-          }
-        })
-        .on("mouseleave", function (d) {
-          // console.log("remove tooltip");
-          //selecting the element by id
+          console.log("node target:", d);
+
+          //tooltipInfo = nodeToolTip(d);
+
+          div.transition().duration(100).style("opacity", 0.9);
+
+          div.append("div").text(d.count).attr("class", "tooltipCont");
+          div.append("div").text(d.groups.length).attr("class", "tooltipCont");
+          div.append("div").text("9000").attr("class", "tooltipCont");
+
+          div.append("div").text("Traffic").attr("class", "tooltipCont");
+          div.append("div").text("Groups").attr("class", "tooltipCont");
+          div.append("div").text("People").attr("class", "tooltipCont");
+
+          div
+            .append("div")
+            .text("Go to " + d.name)
+            .attr("id", "toolTipBtn")
+            .append("a")
+            .attr("href", d.path);
+
+          $("#toolTipBtn").click(function () {
+            var link = $(this).attr("href");
+            $("#toolTipBtn").load(link);
+          });
+
+          console.log("d3.event: ", d3.event);
+
+          div
+            .style("left", d3.event.pageX + 33 + "px")
+            .style("top", d3.event.pageY - 124 + "px");
         });
 
       //add a mouse leave event

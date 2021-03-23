@@ -24,6 +24,7 @@
 function reduceData(cb, data) {
   var location = "";
   var groups = [];
+  var poepleCount = "";
   var root = null;
   var newArr = null;
   var masterArr = [];
