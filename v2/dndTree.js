@@ -9,7 +9,6 @@ var scripts = [
   "nodeTreeV2/vendors/modernizr.js",
   "nodeTreeV2/vendors/placeholder.js",
   "nodeTreeV2/vendors/select2.min.js",
-  "nodeTreeV2/vendors/underscore-min.js",
   "nodeTreeV2/d3-context-menu.js",
   "nodeTreeV2/foundation.min.js",
   "nodeTreeV2/foundation.alert.js",
@@ -403,8 +402,11 @@ function createNodeTree() {
       .scaleExtent([0.1, 3])
       .on("zoom", zoom);
 
+    //adding a additional div for the hit box --pierre
     var div = d3
       .select("#tree-container")
+      .append("div")
+      .attr("id", "hitbox")
       .append("div")
       .attr("class", "node_tooltip")
       .style("opacity", 0);
@@ -570,8 +572,9 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
+          console.log("MOUSEENTER");
           //tooltipInfo = nodeToolTip(d);
-          div.transition().duration(100).style("opacity", 0.9);
+          div.transition().style("opacity", 0.9);
 
           //create my containers
           var tooltipMainContainer = document.createElement("div");
@@ -607,7 +610,7 @@ function createNodeTree() {
           groupContainer.appendChild(groupTitle);
 
           var peopleCount = document.createElement("div");
-          peopleCount.innerText = d.peopleCount.length; // placehodler pierre needs to replace this
+          peopleCount.innerText = d.peopleCount.length;
           peopleCount.id = "tooltipContCount";
           var peopleTitle = document.createElement("div");
           peopleTitle.innerText = "People";
@@ -632,23 +635,54 @@ function createNodeTree() {
           //append the d3 tooltip div
           $(".node_tooltip").append(tooltipMainContainer);
 
-          $("#toolTipBtn").click(function () {
-            var link = $(this).attr("href");
-            $("#toolTipBtn").load(link);
-          });
+          // $("#toolTipBtn").click(function () {
+          //   var link = $(this).attr("href");
+          //   $("#toolTipBtn").load(link);
+          // });
 
-          div
-            .style("left", d3.event.pageX + 33 + "px")
-            .style("top", d3.event.pageY - 124 + "px");
-        })
-        .on("mouseout", function () {
-          //work around should lookinto this more
-          $(".node_tooltip").empty();
-          div.transition().duration(1).style("opacity", 1e-6);
-          //removeing our options
+          // console.log(
+          //   "d obj",
+          //   d,
+          //   "\nd3 event:",
+          //   d3.event,
+          //   "circle:",
+          //   "d3.event.target:",
+          //   d3.event
+          // );
+
+          var reposition = getOffset(d3.event.path[0]);
+          function getOffset(el) {
+            const rect = el.getBoundingClientRect();
+            // console.log("target rect:", rect);
+            return {
+              left: rect.right + window.scrollX,
+              top: rect.top + window.scrollY,
+            };
+          }
+
+          // console.log("positioning obj:", reposition);
+
+          var applyPosition = document.getElementById("hitbox");
+          applyPosition.style.left = reposition.left + "px";
+          applyPosition.style.top = reposition.top / 2 + "px";
         });
 
-      //add a mouse leave event
+      node.on("mouseleave", function () {
+        //make a conditional to say if the tooltip in focus then dont close
+        console.log("d3.event", d3.event);
+        if (!d3.event.toElement.id === "hitbox") {
+          //the tooltip isn't attache so you lust find a way to grba it and remove ti
+          // $(".node_tooltip").empty();
+          console.log("hit!");
+          document.getElementsByClassName(".node_tooltip").empty();
+          div.transition().duration(1).style("opacity", 1e-6);
+        }
+      });
+
+      //add event listener to show on leave of the tooltip
+      $("hitbox").on("mouseleave", function (e) {
+        console.log("mouse leave of tooltip:", e);
+      });
 
       nodeEnter
         .append("text")
