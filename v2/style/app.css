@@ -68,15 +68,19 @@ div.node_tooltip a:active {
 
 #hitbox {
   position: absolute;
-  background-color: red;
-  padding-left: 12px;
-  margin-left: -5px;
+  padding-left: 10px;
+  margin-left: -8px;
+}
+#tooltipTitle {
+  color: white;
+  border-radius: 3px;
+  margin-bottom: 3px;
 }
 
 #toolTipBtn {
   background-color: #3949ab;
   border-radius: 3px;
-  color: aliceblue;
+  color: white;
   padding: 5px;
 }
 #toolTipBtnLink {

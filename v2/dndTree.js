@@ -403,7 +403,7 @@ function createNodeTree() {
       .on("zoom", zoom);
 
     //adding a additional div for the hit box --pierre
-    var div = d3
+    var $popover = d3
       .select("#tree-container")
       .append("div")
       .attr("id", "hitbox")
@@ -561,6 +561,20 @@ function createNodeTree() {
         })
         .on("click", click);
 
+      //creaing the drawer for displaying information of the
+      var drawer = document.createElement("div");
+      drawer.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+      drawer.style.left = "0px";
+      drawer.style.height = window.innerHeight - 1 + "px";
+      drawer.style.position = "absolute";
+      drawer.style.top = "0px";
+      drawer.style.width = window.innerWidth - 1 + "px";
+      drawer.style.zIndex = "201";
+
+      drawer.addEventListener("click", function () {
+        drawer.parentNode.removeChild(drawer);
+      });
+
       nodeEnter
         .append("circle")
         .attr("class", "nodeCircle")
@@ -572,16 +586,33 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          console.log("MOUSEENTER");
+          //make a conditional that if the tooltip is active then remove
+          console.log("mouseenter", d3.event);
+          if (d3.event.toElement.localName === "circle") {
+            $(".node_tooltip").empty();
+            $popover.transition().duration(0).style("opacity", 1e-6);
+          }
+
           //tooltipInfo = nodeToolTip(d);
-          div.transition().style("opacity", 0.9);
+          $popover.transition().duration(0).style("opacity", 0.9);
 
           //create my containers
           var tooltipMainContainer = document.createElement("div");
           tooltipMainContainer.id = "tooltipMainCont";
 
+          console.log("d:", d);
+
+          var tooltipTitle = document.createElement("div");
+          tooltipTitle.id = "tooltipTitle";
+          tooltipTitle.innerText = d.name;
+
           var trafficContainer = document.createElement("div");
           trafficContainer.id = "tooltipChildCont";
+
+          trafficContainer.addEventListener("click", function () {
+            //drawer background
+            document.body.append(drawer);
+          });
 
           var groupContainer = document.createElement("div");
           groupContainer.id = "tooltipChildCont";
@@ -590,7 +621,6 @@ function createNodeTree() {
           peopleContainer.id = "tooltipChildCont";
 
           //append the child div to parent
-
           var siteCount = document.createElement("div");
           siteCount.innerText = d.count;
           siteCount.id = "tooltipContCount";
@@ -627,6 +657,7 @@ function createNodeTree() {
           toolTipButton.appendChild(toolTipButtonLink);
 
           //append the containers to the parent selement
+          tooltipMainContainer.appendChild(tooltipTitle);
           tooltipMainContainer.appendChild(trafficContainer);
           tooltipMainContainer.appendChild(groupContainer);
           tooltipMainContainer.appendChild(peopleContainer);
@@ -635,53 +666,46 @@ function createNodeTree() {
           //append the d3 tooltip div
           $(".node_tooltip").append(tooltipMainContainer);
 
-          // $("#toolTipBtn").click(function () {
-          //   var link = $(this).attr("href");
-          //   $("#toolTipBtn").load(link);
-          // });
-
-          // console.log(
-          //   "d obj",
-          //   d,
-          //   "\nd3 event:",
-          //   d3.event,
-          //   "circle:",
-          //   "d3.event.target:",
-          //   d3.event
-          // );
-
-          var reposition = getOffset(d3.event.path[0]);
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
-            // console.log("target rect:", rect);
+            console.log("rect", rect);
             return {
-              left: rect.right + window.scrollX,
-              top: rect.top + window.scrollY,
+              height: rect.height,
+              left: rect.right,
+              top: rect.top,
+              width: rect.width,
             };
           }
-
-          // console.log("positioning obj:", reposition);
-
-          var applyPosition = document.getElementById("hitbox");
-          applyPosition.style.left = reposition.left + "px";
-          applyPosition.style.top = reposition.top / 2 + "px";
+          console.log("$popover", $popover);
+          var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
+          console.log("top:", top);
+          var $tooltip = document.getElementById("hitbox"); //this is the tooltip
+          var { height } = getOffset($tooltip);
+          console.log("height:", height, top);
+          $tooltip.style.left = left + width / 2 + "px";
+          //reomved top...
+          let heightOverflow = top - height / 2;
+          if (heightOverflow < 0) {
+            heightOverflow = 10;
+          }
+          $tooltip.style.top = heightOverflow + "px";
         });
 
+      var targetEle = "";
       node.on("mouseleave", function () {
         //make a conditional to say if the tooltip in focus then dont close
-        console.log("d3.event", d3.event);
-        if (!d3.event.toElement.id === "hitbox") {
+        targetEle = document.getElementById("hitbox");
+
+        if (!d3.event.toElement.contains(targetEle)) {
           //the tooltip isn't attache so you lust find a way to grba it and remove ti
-          // $(".node_tooltip").empty();
-          console.log("hit!");
-          document.getElementsByClassName(".node_tooltip").empty();
-          div.transition().duration(1).style("opacity", 1e-6);
+          $(".node_tooltip").empty();
+          $popover.transition().duration(0).style("opacity", 1e-6);
         }
       });
 
-      //add event listener to show on leave of the tooltip
-      $("hitbox").on("mouseleave", function (e) {
-        console.log("mouse leave of tooltip:", e);
+      $(".node_tooltip").on("mouseleave", function (e) {
+        $(".node_tooltip").empty();
+        $popover.transition().duration(1).style("opacity", 1e-6);
       });
 
       nodeEnter
