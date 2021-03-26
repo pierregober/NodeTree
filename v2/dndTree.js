@@ -236,22 +236,6 @@ function createNodeTree() {
     } else if (d.children) d.children.forEach(expandAll);
   }
 
-  // function nodeToolTip(d) {
-  //   //resturcture to have divs and felx
-  //
-  //   html = '<a href="' + d.path + '">' + d.name + "</a>";
-  //   lines = 1;
-  //   if (d.count) {
-  //     html += "<br/>" + d.count;
-  //     lines += 1;
-  //   }
-  //   if (d.groups) {
-  //     html += "<br/>" + d.groups.length;
-  //     lines += 1;
-  //   }
-  //   return { html: html, lines: lines };
-  // }
-
   function draw_tree(error, treeData) {
     //for the nodeToolTip
     var siteCount = "";
@@ -562,18 +546,93 @@ function createNodeTree() {
         .on("click", click);
 
       //creaing the drawer for displaying information of the
-      var drawer = document.createElement("div");
-      drawer.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-      drawer.style.left = "0px";
-      drawer.style.height = window.innerHeight - 1 + "px";
-      drawer.style.position = "absolute";
-      drawer.style.top = "0px";
-      drawer.style.width = window.innerWidth - 1 + "px";
-      drawer.style.zIndex = "201";
+      var drawerBackground = document.createElement("div");
+      drawerBackground.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+      drawerBackground.style.left = "0px";
+      drawerBackground.style.height = window.innerHeight - 1 + "px";
+      drawerBackground.style.position = "absolute";
+      drawerBackground.style.top = "0px";
+      drawerBackground.style.width = window.innerWidth - 1 + "px";
+      drawerBackground.style.zIndex = "201";
 
-      drawer.addEventListener("click", function () {
-        drawer.parentNode.removeChild(drawer);
+      var drawerPanel = document.createElement("div");
+      drawerPanel.style.backgroundColor = "#202020";
+      drawerPanel.style.display = "flex";
+      drawerPanel.style.flexDirection = "column";
+      drawerPanel.style.height = "100vh";
+      drawerPanel.style.right = "-350px";
+      drawerPanel.style.position = "absolute";
+      drawerPanel.style.textAlign = "left";
+      drawerPanel.style.top = "0px";
+      drawerPanel.style.width = "350px"; //Tree Fiddy
+      drawerPanel.style.zIndex = "202";
+
+      var drawerHeader = document.createElement("div");
+      drawerHeader.style.borderBottom = "1px solid #444444";
+      drawerHeader.style.display = "flex";
+      drawerHeader.style.alignItems = "center";
+      drawerHeader.style.flexDirection = "row";
+      drawerHeader.style.padding = "0 0.125rem 0 1rem";
+
+      var drawerTitle = document.createElement("div");
+      drawerTitle.style.color = "white";
+      drawerTitle.style.flex = "1";
+
+      var drawerExit = document.createElement("div");
+      drawerExit.innerText = "X";
+      drawerExit.style.color = "white";
+      drawerExit.style.display = "flex";
+      drawerExit.style.justifyContent = "center";
+      drawerExit.style.alignItems = "center";
+      drawerExit.style.cursor = "pointer";
+      drawerExit.style.fontWeight = "bolder";
+      drawerExit.style.height = "2.5rem";
+      drawerExit.style.width = "2.5rem";
+      drawerExit.style.borderRadius = ".25rem";
+      drawerExit.style.textSize = "16pt";
+
+      var drawerBody = document.createElement("div");
+      drawerBody.style.color = "white";
+      drawerBody.style.flex = "1";
+      drawerBody.style.overflowY = "auto";
+
+      //EVENT LISTNERS
+      drawerBackground.addEventListener("click", function () {
+        drawerPanel.style.animationDuration = "0.5s";
+        drawerPanel.style.animationFillMode = "forwards";
+        drawerPanel.style.animationIterationCount = 1;
+        drawerPanel.style.animationName = "drawerCloseAnimation";
+        drawerPanel.style.animationTimingFunction = "ease-out";
+        drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        drawerBackground.parentNode.removeChild(drawerBackground);
       });
+
+      //on hover change the back background
+      drawerExit.addEventListener("mouseenter", function () {
+        drawerExit.style.backgroundColor = "#444444";
+      });
+
+      //on mouse leave change the back ground back
+      drawerExit.addEventListener("mouseleave", function () {
+        drawerExit.style.backgroundColor = "inherit";
+        drawerExit.style.color = "white";
+      });
+
+      drawerExit.addEventListener("click", function () {
+        drawerPanel.style.animationDuration = "0.5s";
+        drawerPanel.style.animationFillMode = "forwards";
+        drawerPanel.style.animationIterationCount = 1;
+        drawerPanel.style.animationName = "drawerCloseAnimation";
+        drawerPanel.style.animationTimingFunction = "ease-in";
+        drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        drawerBackground.parentNode.removeChild(drawerBackground);
+      });
+
+      drawerHeader.appendChild(drawerTitle);
+      drawerHeader.appendChild(drawerExit);
+      drawerPanel.appendChild(drawerHeader);
+      drawerPanel.appendChild(drawerBody);
+      document.body.append(drawerPanel);
 
       nodeEnter
         .append("circle")
@@ -582,11 +641,12 @@ function createNodeTree() {
         .style("fill", colorNode)
         .style("stroke", function (d) {
           if (d.class === "found") {
-            return "#2E8B57"; // seagreen
+            return "#2E8B57";
           }
         })
         .on("mouseenter", function (d) {
           //make a conditional that if the tooltip is active then remove
+          console.log("LOOK d:", d);
           console.log("mouseenter", d3.event);
           if (d3.event.toElement.localName === "circle") {
             $(".node_tooltip").empty();
@@ -600,22 +660,38 @@ function createNodeTree() {
           var tooltipMainContainer = document.createElement("div");
           tooltipMainContainer.id = "tooltipMainCont";
 
-          console.log("d:", d);
-
           var tooltipTitle = document.createElement("div");
           tooltipTitle.id = "tooltipTitle";
-          tooltipTitle.innerText = d.name;
+          tooltipTitle.innerText = d.name.toUpperCase();
 
           var trafficContainer = document.createElement("div");
           trafficContainer.id = "tooltipChildCont";
 
-          trafficContainer.addEventListener("click", function () {
-            //drawer background
-            document.body.append(drawer);
-          });
-
           var groupContainer = document.createElement("div");
           groupContainer.id = "tooltipChildCont";
+
+          groupContainer.addEventListener("click", function () {
+            drawerTitle.innerText = d.name.toUpperCase();
+
+            //move the drawer back into the view of the user
+
+            drawerPanel.style.animationDuration = "0.5s";
+            drawerPanel.style.animationFillMode = "forwards";
+            drawerPanel.style.animationIterationCount = 1;
+            drawerPanel.style.animationName = "drawerOpenAnimation";
+            drawerPanel.style.animationTimingFunction = "ease-out";
+
+            //append the background
+            document.body.append(drawerBackground);
+            //iterate through the array of groups
+            d.groups.forEach(function (group, index) {
+              var groupCard = document.createElement("div");
+              groupCard.id = "drawerCard";
+              groupCard.style.borderBottom = "1px solid #444444";
+              groupCard.innerText = group.name;
+              drawerBody.appendChild(groupCard);
+            });
+          });
 
           var peopleContainer = document.createElement("div");
           peopleContainer.id = "tooltipChildCont";
@@ -668,7 +744,6 @@ function createNodeTree() {
 
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
-            console.log("rect", rect);
             return {
               height: rect.height,
               left: rect.right,
@@ -676,12 +751,10 @@ function createNodeTree() {
               width: rect.width,
             };
           }
-          console.log("$popover", $popover);
+
           var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
-          console.log("top:", top);
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
           var { height } = getOffset($tooltip);
-          console.log("height:", height, top);
           $tooltip.style.left = left + width / 2 + "px";
           //reomved top...
           let heightOverflow = top - height / 2;

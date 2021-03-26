@@ -1,3 +1,25 @@
+@keyframes drawerOpenAnimation {
+  from {
+    right: -350px;
+  }
+  to {
+    right: 0px;
+  }
+}
+
+@keyframes drawerCloseAnimation {
+  from {
+    right: 0px;
+  }
+  to {
+    right: -350px;
+  }
+}
+
+#drawerCard {
+  padding: 1rem;
+}
+
 .node {
   cursor: pointer;
 }
