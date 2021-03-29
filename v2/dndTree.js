@@ -240,7 +240,7 @@ function createNodeTree() {
     //for the nodeToolTip
     var siteCount = "";
     var groupCount = "";
-    var peopleCount = "";
+    var Count = "";
 
     // Calculate total nodes, max label length
     var totalNodes = 0;
@@ -577,6 +577,8 @@ function createNodeTree() {
       var drawerTitle = document.createElement("div");
       drawerTitle.style.color = "white";
       drawerTitle.style.flex = "1";
+      drawerTitle.style.fontSize = "1.2rem";
+      drawerTitle.style.fontWeight = "400";
 
       var drawerExit = document.createElement("div");
       drawerExit.innerText = "X";
@@ -592,6 +594,7 @@ function createNodeTree() {
       drawerExit.style.textSize = "16pt";
 
       var drawerBody = document.createElement("div");
+      drawerBody.id = "drawerBodyContainer";
       drawerBody.style.color = "white";
       drawerBody.style.flex = "1";
       drawerBody.style.overflowY = "auto";
@@ -646,8 +649,7 @@ function createNodeTree() {
         })
         .on("mouseenter", function (d) {
           //make a conditional that if the tooltip is active then remove
-          console.log("LOOK d:", d);
-          console.log("mouseenter", d3.event);
+
           if (d3.event.toElement.localName === "circle") {
             $(".node_tooltip").empty();
             $popover.transition().duration(0).style("opacity", 1e-6);
@@ -663,6 +665,7 @@ function createNodeTree() {
           var tooltipTitle = document.createElement("div");
           tooltipTitle.id = "tooltipTitle";
           tooltipTitle.innerText = d.name.toUpperCase();
+          tooltipTitle.style.fontWeight = "400";
 
           var trafficContainer = document.createElement("div");
           trafficContainer.id = "tooltipChildCont";
@@ -684,11 +687,25 @@ function createNodeTree() {
             //append the background
             document.body.append(drawerBackground);
             //iterate through the array of groups
+            //have a collector
+            var people = [];
             d.groups.forEach(function (group, index) {
+              //seperate into two arrays for actual groups
+              if (group.isGroup) {
+                var groupCard = document.createElement("div");
+                groupCard.id = "drawerCard";
+                groupCard.style.borderBottom = "1px solid #444444";
+                groupCard.innerText = group.name;
+                drawerBody.appendChild(groupCard);
+              } else {
+                people.push(group);
+              }
+            });
+            people.map(function (person, index) {
               var groupCard = document.createElement("div");
               groupCard.id = "drawerCard";
               groupCard.style.borderBottom = "1px solid #444444";
-              groupCard.innerText = group.name;
+              groupCard.innerText = person.name;
               drawerBody.appendChild(groupCard);
             });
           });

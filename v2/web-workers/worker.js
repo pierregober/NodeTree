@@ -8,6 +8,9 @@ function formatSites(props) {
 function formatPermissions(props) {
   return {
     name: props.Member.Title,
+    isGroup: props.Member.hasOwnProperty("AllowRequestToJoinLeave")
+      ? true
+      : false,
     members: (props.Member.Users?.results || []).map(function (member) {
       return {
         email: member.Email,
