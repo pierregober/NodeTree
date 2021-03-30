@@ -123,6 +123,7 @@ function createNodeTree() {
       clearAll(tree_root);
       expandAll(tree_root);
       outer_update(tree_root);
+      console.log(this, e);
 
       searchField = "d.name";
       searchText = e.params.args.data.text;
@@ -141,7 +142,6 @@ function createNodeTree() {
       clearAll(tree_root);
       expandAll(tree_root);
       outer_update(tree_root);
-      console.log("revised 0");
     });
     //callback to get treeData
     function cb(error, props) {
@@ -149,7 +149,7 @@ function createNodeTree() {
         console.log(error);
         return;
       }
-      draw_tree(null, props[0]);
+      draw_tree(null, props);
     }
     getTreeData(cb);
   });
@@ -163,24 +163,30 @@ function createNodeTree() {
   outer_centerNode = null;
   var nodeTextOffset = 15;
 
-  function select2DataCollectName(d) {
-    if (d.children) d.children.forEach(select2DataCollectName);
-    else if (d._children) d._children.forEach(select2DataCollectName);
+  //adds values to the array recursively
+  function select2DataCollection(d) {
+    //collect the names
+    if (d.children) d.children.forEach(select2DataCollection);
+    //collect the groups + personnel with direct site permissions
+    if (d.groups)
+      d.groups.forEach(function (group, index) {
+        select2Data.push(group.name);
+      });
     select2Data.push(d.name);
   }
 
   function searchTree(d, first_call = false) {
     if (d.children) d.children.forEach(searchTree);
-    else if (d._children) d._children.forEach(searchTree);
-    var searchFieldValue = eval(searchField);
-    if (searchFieldValue && searchFieldValue.match(searchText)) {
-      if (first_call) {
-        d.search_target = true;
-      } else {
-        d.search_target = false;
-      }
-      // Walk parent chain
-      if (d.name) {
+    //search by node name, group, or people
+    if (d.name) {
+      if (
+        d.groups.find((g) => g.name === searchText) ||
+        d.name.match(searchText) ||
+        d.people.find((p) => p.title === searchText)
+      ) {
+        d.search_target = first_call;
+
+        // Walk parent chain
         var ancestors = [];
         var parent = d;
         while (typeof parent !== "undefined") {
@@ -441,20 +447,8 @@ function createNodeTree() {
 
     // color a node properly
     function colorNode(d) {
-      result = "#fff";
-      if (d.class === "found") {
-        result = "#ff4136"; //red
-      } else if (d.type == "synthetic") {
-        result = d._children || d.children ? "darkgray" : "lightgray";
-      } else if (d.type == "person") {
-        result = d._children || d.children ? "royalblue" : "skyblue";
-      } else if (d.type == "two") {
-        result = d._children || d.children ? "orangered" : "orange";
-      } else if (d.type == "three") {
-        result = d._children || d.children ? "yellowgreen" : "yellow";
-      } else {
-        result = "lightsteelblue";
-      }
+      result = "lightsteelblue";
+      if (d.class === "found") result = "#3949ab"; //pierre changed the node found color
       return result;
     }
 
@@ -547,54 +541,25 @@ function createNodeTree() {
 
       //creaing the drawer for displaying information of the
       var drawerBackground = document.createElement("div");
-      drawerBackground.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-      drawerBackground.style.left = "0px";
+      drawerBackground.id = "drawerBackground";
       drawerBackground.style.height = window.innerHeight - 1 + "px";
-      drawerBackground.style.position = "absolute";
-      drawerBackground.style.top = "0px";
       drawerBackground.style.width = window.innerWidth - 1 + "px";
-      drawerBackground.style.zIndex = "201";
 
       var drawerPanel = document.createElement("div");
-      drawerPanel.style.backgroundColor = "#202020";
-      drawerPanel.style.display = "flex";
-      drawerPanel.style.flexDirection = "column";
-      drawerPanel.style.height = "100vh";
-      drawerPanel.style.right = "-350px";
-      drawerPanel.style.position = "absolute";
-      drawerPanel.style.textAlign = "left";
-      drawerPanel.style.top = "0px";
-      drawerPanel.style.width = "350px"; //Tree Fiddy
-      drawerPanel.style.zIndex = "202";
+      drawerPanel.id = "drawerPanel";
 
       var drawerHeader = document.createElement("div");
-      drawerHeader.style.borderBottom = "1px solid #444444";
-      drawerHeader.style.display = "flex";
-      drawerHeader.style.alignItems = "center";
-      drawerHeader.style.flexDirection = "row";
-      drawerHeader.style.padding = "0 0.125rem 0 1rem";
+      drawerHeader.id = "drawerHeader";
 
       var drawerTitle = document.createElement("div");
-      drawerTitle.style.color = "white";
-      drawerTitle.style.flex = "1";
-      drawerTitle.style.fontSize = "1.2rem";
-      drawerTitle.style.fontWeight = "400";
+      drawerTitle.id = "drawerTitle";
 
       var drawerExit = document.createElement("div");
+      drawerExit.id = "drawerExit";
       drawerExit.innerText = "X";
-      drawerExit.style.color = "white";
-      drawerExit.style.display = "flex";
-      drawerExit.style.justifyContent = "center";
-      drawerExit.style.alignItems = "center";
-      drawerExit.style.cursor = "pointer";
-      drawerExit.style.fontWeight = "bolder";
-      drawerExit.style.height = "2.5rem";
-      drawerExit.style.width = "2.5rem";
-      drawerExit.style.borderRadius = ".25rem";
-      drawerExit.style.textSize = "16pt";
 
       var drawerBody = document.createElement("div");
-      drawerBody.id = "drawerBodyContainer";
+      drawerBody.id = "drawerBody";
       drawerBody.style.color = "white";
       drawerBody.style.flex = "1";
       drawerBody.style.overflowY = "auto";
@@ -674,6 +639,8 @@ function createNodeTree() {
           groupContainer.id = "tooltipChildCont";
 
           groupContainer.addEventListener("click", function () {
+            console.log("d3.event:", d3.event, "d: ", d);
+
             drawerTitle.innerText = d.name.toUpperCase();
 
             //move the drawer back into the view of the user
@@ -689,24 +656,60 @@ function createNodeTree() {
             //iterate through the array of groups
             //have a collector
             var people = [];
-            d.groups.forEach(function (group, index) {
+            //make the groups to alphabetical order
+            var sortedGroups = d.groups.sort(function (a, b) {
+              if (a.name < b.name) {
+                return -1;
+              }
+              if (a.name > b.name) {
+                return 1;
+              }
+              return 0;
+            });
+
+            //append my groups first
+            sortedGroups.forEach(function (group, index) {
               //seperate into two arrays for actual groups
               if (group.isGroup) {
-                var groupCard = document.createElement("div");
-                groupCard.id = "drawerCard";
-                groupCard.style.borderBottom = "1px solid #444444";
-                groupCard.innerText = group.name;
-                drawerBody.appendChild(groupCard);
+                var groupCardContainer = document.createElement("div");
+                groupCardContainer.id = "drawerCard";
+                groupCardContainer.style.borderBottom = "1px solid #444444";
+                var groupCardPersonnel = document.createElement("div");
+                groupCardPersonnel.innerText = group.name;
+                var groupCardPermission = document.createElement("div");
+                groupCardPermission.innerText = group.access;
+                groupCardPermission.style.color = "#999";
+                groupCardPermission.style.fontSize = ".6rem";
+                groupCardContainer.appendChild(groupCardPersonnel);
+                groupCardContainer.appendChild(groupCardPermission);
+                drawerBody.appendChild(groupCardContainer);
               } else {
                 people.push(group);
               }
             });
+            //append a didiver for the Panel
+            var panelDivider = document.createElement("div");
+            panelDivider.innerText = "Personnel with Direct Site Permissions";
+            panelDivider.style.backgroundColor = "#444444";
+            panelDivider.style.fontWeight = "600";
+            panelDivider.style.padding = ".5rem";
+            panelDivider.style.textAlign = "center";
+            drawerBody.appendChild(panelDivider);
+
+            //append my people afterward
             people.map(function (person, index) {
-              var groupCard = document.createElement("div");
-              groupCard.id = "drawerCard";
-              groupCard.style.borderBottom = "1px solid #444444";
-              groupCard.innerText = person.name;
-              drawerBody.appendChild(groupCard);
+              var groupCardContainer = document.createElement("div");
+              groupCardContainer.id = "drawerCard";
+              groupCardContainer.style.borderBottom = "1px solid #444444";
+              var groupCardPersonnel = document.createElement("div");
+              groupCardPersonnel.innerText = person.name;
+              var groupCardPermission = document.createElement("div");
+              groupCardPermission.innerText = person.access;
+              groupCardPermission.style.color = "#999";
+              groupCardPermission.style.fontSize = ".6rem";
+              groupCardContainer.appendChild(groupCardPersonnel);
+              groupCardContainer.appendChild(groupCardPermission);
+              drawerBody.appendChild(groupCardContainer);
             });
           });
 
@@ -733,7 +736,7 @@ function createNodeTree() {
           groupContainer.appendChild(groupTitle);
 
           var peopleCount = document.createElement("div");
-          peopleCount.innerText = d.peopleCount.length;
+          peopleCount.innerText = d.people.length;
           peopleCount.id = "tooltipContCount";
           var peopleTitle = document.createElement("div");
           peopleTitle.innerText = "People";
@@ -885,15 +888,15 @@ function createNodeTree() {
         .insert("path", "g")
         .attr("class", "link")
         .attr("stroke-width", function (d) {
-          if (d.target.count > 50) {
+          if (d.target && d.target.count > 10) {
             return "12";
-          } else if (d.target.count > 40) {
+          } else if (d.target.count > 8) {
             return "8";
-          } else if (d.target.count > 30) {
+          } else if (d.target.count > 6) {
             return "6";
-          } else if (d.target.count > 20) {
+          } else if (d.target.count > 4) {
             return "4";
-          } else if (d.target.count > 10) {
+          } else if (d.target.count > 2) {
             return "2";
           } else {
             return "1";
@@ -917,7 +920,7 @@ function createNodeTree() {
         .attr("d", diagonal)
         .style("stroke", function (d) {
           if (d.target.class === "found") {
-            return "#2E8B57"; // seagreen
+            return "#3949ab"; //pierre changed the color of the link on found
           }
         });
 
@@ -962,7 +965,7 @@ function createNodeTree() {
     tree_root = root;
 
     select2Data = [];
-    select2DataCollectName(root);
+    select2DataCollection(root);
     select2DataObject = [];
     select2Data
       .sort(function (a, b) {

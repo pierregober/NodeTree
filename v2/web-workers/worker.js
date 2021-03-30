@@ -1,16 +1,23 @@
-// "use strict";
-
 function formatSites(props) {
   return {
     url: props.ServerRelativeUrl,
   };
 }
+
 function formatPermissions(props) {
+  //get all permissions of the group
+  var accessArr = props.RoleDefinitionBindings.results
+    .reduce(function (r, a) {
+      return r.concat([a.Name]);
+    }, [])
+    .sort()
+    .join(", ");
   return {
-    name: props.Member.Title,
+    access: accessArr,
     isGroup: props.Member.hasOwnProperty("AllowRequestToJoinLeave")
       ? true
       : false,
+    name: props.Member.Title,
     members: (props.Member.Users?.results || []).map(function (member) {
       return {
         email: member.Email,

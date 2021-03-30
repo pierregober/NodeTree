@@ -1,26 +1,3 @@
-// function formatUsageLog(cb) {
-//   var siteurl = _spPageContextInfo.siteAbsoluteUrl;
-//
-//   $.ajax({
-//     url:
-//       siteurl +
-//       "/_api/web/lists/getbytitle('UsageLog')/items?$select=pathname,Author/Title,BrowserType,Created&$expand=Author&$orderby=pathname&$top=5000",
-//     method: "GET",
-//     headers: {
-//       Accept: "application/json; odata=verbose",
-//       "content-type": "application/json; odata=verbose",
-//       "X-RequestDigest": $("#__REQUESTDIGEST").val(),
-//     },
-//     success: function (data) {
-//       var reformattedData = reduceData(data.d);
-//       cb(null, reformattedData);
-//     },
-//     error: function (error) {
-//       console.log("Error retrieving UsageLog: " + JSON.stringify(error));
-//     },
-//   });
-// }
-
 function reduceData(cb, data) {
   var location = "";
   var groups = [];
@@ -30,37 +7,31 @@ function reduceData(cb, data) {
   var masterArr = [];
   var test = null;
   data.forEach(function (props, idx) {
+    //Step 1 - Format the pathname names
     location = props.pathname;
 
-    //check and remove the intelink.gov
-    props.pathname = props.pathname.split(
-      `https://intelshare.intelink.gov/sites/`
-    )[1];
-
-    //convert if a html special char is detected
-    if (props.pathname.indexOf("%") > -1) {
-      props.pathname = decodeURIComponent(props.pathname);
-    }
-    //check the last character of the pathname is "/" and removes it
-    if (props.pathname.charAt(props.pathname.length - 1) === "/") {
+    //Step 1a - Check and remove the intelink.gov
+    props.pathname = props.pathname.split(`.gov/sites/`)[1];
+    //Step 1b - Convert if a html special char is detected
+    props.pathname = decodeURIComponent(props.pathname);
+    //Step 1c - Check the last character of the pathname is "/" and removes it
+    if (props.pathname.slice(-1) === "/") {
       props.pathname = props.pathname.substring(0, props.pathname.length - 1);
     }
-    //check and remove if the first char is a whack; leaving this for future cases
-    if (props.pathname.charAt(0) === "/") {
+    //Step 1d - Check and remove if the first char is a whack; leaving this for future cases
+    if (props.pathname.slice(0, 1) === "/") {
       props.pathname = props.pathname.substring(1, props.pathname.length);
     }
-    //lowercase the pathname + split into strings
+    //Step 1e - Lowercase the pathname + split into strings
     props.pathname = props.pathname.toLowerCase().split("/");
 
-    //grab the groups
-    groups = props.groups;
-
-    // get the number of people in the groups
-    //filter out by person
-    peopleCount = groups.reduce(function (acc, props) {
+    //Step 3 - Get # people in the groups, filter out by person + remove the dupes
+    peopleCount = props.groups.reduce(function (acc, props) {
+      //First the array is built
       if (acc.length === 0) {
         acc.push(props.members);
       }
+      //Checks if the person isn't there already, if not add
       props.members.map(function (person, index) {
         if (acc.indexOf(person) === -1) {
           acc.push(person);
@@ -69,22 +40,29 @@ function reduceData(cb, data) {
       return acc;
     }, []);
 
-    //format the pathname
+    //Step 4 - Prep the data to get ready for the binary search algo by gettting neccesary fields
     var lastItem = "";
     newArr = props.pathname.reduce(function (acc, path, index) {
-      //the inital go around
+      //The inital go around because the parent is null
       if (acc.length === 0) {
-        acc.push({ name: path, parent: null, count: 1 });
+        acc.push({
+          name: path,
+          parent: null,
+          count: 1,
+          groups: props.groups,
+          people: peopleCount,
+          path: location,
+        });
         lastItem = path;
       } else {
-        //determine if it's the last entry to add the groups
+        //Determine if it's the last entry to add the groups
         if (props.pathname.length - 1 === index) {
           acc.push({
             name: path,
             parent: lastItem,
             count: 1,
-            groups: groups,
-            peopleCount: peopleCount,
+            groups: props.groups,
+            people: peopleCount,
             path: location,
           });
           lastItem = path;
@@ -96,6 +74,7 @@ function reduceData(cb, data) {
       return acc;
     }, []);
 
+    //Step 5 - Gets rid of dupes and pushes the entry into a masterArr
     newArr.forEach(function (newEl) {
       var matchIdx = masterArr.findIndex(
         (masterEl) =>
@@ -109,7 +88,6 @@ function reduceData(cb, data) {
     });
   });
 
-  createTree(masterArr);
   function createTree(arr) {
     var idMapping = arr.reduce(function (acc, el, i) {
       acc[el.name] = i;
@@ -129,7 +107,9 @@ function reduceData(cb, data) {
       parentEl.children = [...(parentEl.children || []), el];
     });
   }
+  createTree(masterArr);
 
+  //This gets the count of the broswers
   //Currently the browser isn't been recorded on this dataset
 
   // var lastBrowserType = "";
@@ -161,6 +141,6 @@ function reduceData(cb, data) {
   // }, {});
   // console.log("masterArr:", masterArr);
   // return masterArr;
-  console.log("masterArr:", masterArr);
-  cb(null, masterArr);
+  console.log("masterArr:", masterArr[0]);
+  cb(null, masterArr[0]);
 }
