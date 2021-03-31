@@ -87,6 +87,8 @@ var links = [
 })();
 
 function createNodeTree() {
+  var $select2 = null;
+  var changeSelectColor = null;
   Foundation.global.namespace = ""; // pierre
   //Create the div for the nodeTree + append to content area
   var initTree = document.createElement("div");
@@ -100,12 +102,17 @@ function createNodeTree() {
   var searchField = document.createElement("div");
   searchField.id = "searchName";
 
+  var $searchExit = document.createElement("div");
+  $searchClear.id = "searchExit";
+  $searchClear.innerText = "Clear";
+
   blockContainer.appendChild(searchField);
   searchContainer.appendChild(blockContainer);
 
   //Append to the area where webparts go
   var nodeTreeContainer = document.getElementById("contentBox");
   nodeTreeContainer.appendChild(searchContainer);
+  nodeTreeContainer.appendChild(searchClear);
   nodeTreeContainer.appendChild(initTree);
 
   // for the first initialization
@@ -118,31 +125,7 @@ function createNodeTree() {
       });
       element.focus();
     });
-    //Select2 Searching
-    $("#searchName").on("select2:selecting", function (e) {
-      clearAll(tree_root);
-      expandAll(tree_root);
-      outer_update(tree_root);
-      console.log(this, e);
 
-      searchField = "d.name";
-      searchText = e.params.args.data.text;
-      firstCall = true;
-      searchTree(tree_root, firstCall);
-      tree_root.children.forEach(collapseAllNotFound);
-      outer_update(tree_root);
-      tree_root.children.forEach(centerSearchTarget);
-    });
-    //Select2 Clearing
-    $("#searchName").on("select2:clearing", function (e) {
-      console.log("event data onClear:", e);
-
-      searchField = null;
-      searchText = null;
-      clearAll(tree_root);
-      expandAll(tree_root);
-      outer_update(tree_root);
-    });
     //callback to get treeData
     function cb(error, props) {
       if (error) {
@@ -447,7 +430,7 @@ function createNodeTree() {
 
     // color a node properly
     function colorNode(d) {
-      result = "lightsteelblue";
+      result = "#777";
       if (d.class === "found") result = "#3949ab"; //pierre changed the node found color
       return result;
     }
@@ -982,12 +965,70 @@ function createNodeTree() {
           text: item,
         });
       });
-    $("#searchName").select2({
+    console.log("select2DataObject: ", select2DataObject);
+
+    $select2 = $("#searchName").select2({
       data: select2DataObject,
       containerCssClass: "search",
       placeholder: "Search this tree",
       allowClear: true,
       debug: true,
     });
+
+    //Select2 Searching
+    $select2.on("select2:selecting", function (e) {
+      clearAll(tree_root);
+      expandAll(tree_root);
+      outer_update(tree_root);
+      console.log("select2 selecting event: ", e);
+
+      //make conditional to check for a var
+      var style = document.createElement("style");
+      style.type = "text/css";
+      style.textContent = `.select2-selection__placeholder {
+        color: #222 !important;
+      }`;
+      document.getElementsByTagName("head")[0].appendChild(style);
+
+      //replace and make the placeholder the item name
+      $select2 = $("#searchName").select2({
+        data: select2DataObject,
+        containerCssClass: "search",
+        placeholder: e.params.args.data.text,
+        debug: true,
+      });
+      if (!changeSelectColor) {
+        var test = document.getElementsByClassName(
+          "select2-selection__placeholder"
+        )[0];
+        test.style.color = "#222";
+      }
+
+      searchField = "d.name";
+      searchText = e.params.args.data.text;
+      firstCall = true;
+      searchTree(tree_root, firstCall);
+      tree_root.children.forEach(collapseAllNotFound);
+      outer_update(tree_root);
+      tree_root.children.forEach(centerSearchTarget);
+    });
+
+    //Select2 Clearing
+    // $select2.on("select2:clearing", function (e) {
+    //   console.log("event data onClear:", e);
+    //   //not the right way but works -- change it  pierre
+    //   //destory the element and then make a new one TEST
+    //   // $select2.html("");
+    //   // $select2 = $("#searchName").select2({
+    //   //   data: select2DataObject,
+    //   //   containerCssClass: "search",
+    //   //   placeholder: "Search this tree",
+    //   //   debug: true,
+    //   // });
+    //
+    //   clearAll(tree_root);
+    //   expandAll(tree_root);
+    //   outer_update(tree_root);
+    // });
   }
 }

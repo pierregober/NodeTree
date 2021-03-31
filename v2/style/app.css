@@ -16,6 +16,15 @@
   }
 }
 
+#tree-container {
+  position: absolute;
+  left: 0;
+}
+
+#searchExit {
+  position: absolute;
+  z-index: 1;
+}
 #drawerBackground {
   background-color: rgba(0, 0, 0, 0.4);
   left: 0px;
