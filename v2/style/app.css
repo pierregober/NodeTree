@@ -16,15 +16,50 @@
   }
 }
 
+/* clear the view for the node tree */
+#contentBox {
+  margin-right: 0px;
+  margin-left: 0px;
+  min-width: 0px;
+}
+#contentRow {
+  padding: 0px;
+}
+
+#DeltaPlaceHolderMain {
+  display: none !important;
+}
+
+#sideNavBox {
+  display: none !important;
+}
+/* end of clear the view for the node tree */
+
+#block-container {
+  display: flex;
+  margin-left: 20px;
+}
+
 #tree-container {
   position: absolute;
   left: 0;
 }
 
-#searchExit {
-  position: absolute;
-  z-index: 1;
+#searchClear {
+  background-color: #888;
+  border-radius: 4px;
+  color: white;
+  display: none;
+  line-height: 24px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
+
+#searchClear:hover {
+  background-color: #444;
+  cursor: pointer;
+}
+
 #drawerBackground {
   background-color: rgba(0, 0, 0, 0.4);
   left: 0px;

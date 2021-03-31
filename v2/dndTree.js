@@ -73,22 +73,11 @@ var links = [
     });
   }
   loadScripts();
-
-  // removing the spacer for the webparts
-  // removes the SCRIPT EDITOR
-  // if (
-  //   document.getElementsByClassName("ms-core-tableNoSpace ms-webpartPage-root")
-  // ) {
-  //   var removeSpace = document.getElementsByClassName(
-  //     "ms-core-tableNoSpace ms-webpartPage-root"
-  //   );
-  //   removeSpace[0].remove();
-  // }
 })();
 
 function createNodeTree() {
   var $select2 = null;
-  var changeSelectColor = null;
+  var placeholderStyle = null;
   Foundation.global.namespace = ""; // pierre
   //Create the div for the nodeTree + append to content area
   var initTree = document.createElement("div");
@@ -102,17 +91,17 @@ function createNodeTree() {
   var searchField = document.createElement("div");
   searchField.id = "searchName";
 
-  var $searchExit = document.createElement("div");
-  $searchClear.id = "searchExit";
+  var $searchClear = document.createElement("div");
+  $searchClear.id = "searchClear";
   $searchClear.innerText = "Clear";
 
   blockContainer.appendChild(searchField);
+  blockContainer.appendChild($searchClear);
   searchContainer.appendChild(blockContainer);
 
   //Append to the area where webparts go
   var nodeTreeContainer = document.getElementById("contentBox");
   nodeTreeContainer.appendChild(searchContainer);
-  nodeTreeContainer.appendChild(searchClear);
   nodeTreeContainer.appendChild(initTree);
 
   // for the first initialization
@@ -148,17 +137,28 @@ function createNodeTree() {
 
   //adds values to the array recursively
   function select2DataCollection(d) {
+    console.log("d for the array:", d);
     //collect the names
     if (d.children) d.children.forEach(select2DataCollection);
-    //collect the groups + personnel with direct site permissions
+    //collect the groups + personnel with direct site permissions <= the personnell shoudl be moved to a site group
     if (d.groups)
       d.groups.forEach(function (group, index) {
         select2Data.push(group.name);
       });
+    //collect the personnel
+    if (d.people) {
+      d.people.forEach(function (person, index) {
+        // if (person.email) {
+        //   console.log("hit0");
+        select2Data.push(person.Title);
+      });
+    }
+    //collect the node name
     select2Data.push(d.name);
   }
 
   function searchTree(d, first_call = false) {
+    console.log("d in search", d);
     if (d.children) d.children.forEach(searchTree);
     //search by node name, group, or people
     if (d.name) {
@@ -596,6 +596,7 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
+          console.log("mouseenter event:", d, "\nd3.event", d3.event);
           //make a conditional that if the tooltip is active then remove
 
           if (d3.event.toElement.localName === "circle") {
@@ -747,6 +748,7 @@ function createNodeTree() {
 
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
+            console.log("getBoundingClientRect of node:", rect);
             return {
               height: rect.height,
               left: rect.right,
@@ -755,16 +757,29 @@ function createNodeTree() {
             };
           }
 
+          function tester(el) {
+            const rect = el.getBoundingClientRect();
+            console.log("getBoundingClientRect of tooltip:", rect);
+            return {
+              height: rect.height,
+            };
+          }
+
           var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
-          var { height } = getOffset($tooltip);
+
+          // var { height } = getOffset($tooltip);
+          var { height } = tester($tooltip);
           $tooltip.style.left = left + width / 2 + "px";
-          //reomved top...
-          let heightOverflow = top - height / 2;
+          //the top of the event element (node) minus half the height of the tooltip
+          let heightOverflow = top - height; // experiment by not deviding by two --pierre
           if (heightOverflow < 0) {
             heightOverflow = 10;
           }
           $tooltip.style.top = heightOverflow + "px";
+          console.log("left", left, "\ntop", top, "\nwidth", width);
+          console.log("calculated left: ", left + width / 2 + "px");
+          console.log("heightOverflow: ", heightOverflow);
         });
 
       var targetEle = "";
@@ -965,6 +980,7 @@ function createNodeTree() {
           text: item,
         });
       });
+
     console.log("select2DataObject: ", select2DataObject);
 
     $select2 = $("#searchName").select2({
@@ -980,15 +996,19 @@ function createNodeTree() {
       clearAll(tree_root);
       expandAll(tree_root);
       outer_update(tree_root);
-      console.log("select2 selecting event: ", e);
 
-      //make conditional to check for a var
-      var style = document.createElement("style");
-      style.type = "text/css";
-      style.textContent = `.select2-selection__placeholder {
+      //initially create the styling for the placeholder
+      if (!placeholderStyle) {
+        placeholderStyle = document.createElement("style");
+        placeholderStyle.type = "text/css";
+        placeholderStyle.textContent = `.select2-selection__placeholder {
         color: #222 !important;
       }`;
-      document.getElementsByTagName("head")[0].appendChild(style);
+        document.getElementsByTagName("head")[0].appendChild(placeholderStyle);
+        //if the style element has already bee created then overwrite
+      } else {
+        placeholderStyle.style.color = "#222 !important";
+      }
 
       //replace and make the placeholder the item name
       $select2 = $("#searchName").select2({
@@ -997,12 +1017,8 @@ function createNodeTree() {
         placeholder: e.params.args.data.text,
         debug: true,
       });
-      if (!changeSelectColor) {
-        var test = document.getElementsByClassName(
-          "select2-selection__placeholder"
-        )[0];
-        test.style.color = "#222";
-      }
+
+      $searchClear.style.display = "inherit";
 
       searchField = "d.name";
       searchText = e.params.args.data.text;
@@ -1013,22 +1029,27 @@ function createNodeTree() {
       tree_root.children.forEach(centerSearchTarget);
     });
 
-    //Select2 Clearing
-    // $select2.on("select2:clearing", function (e) {
-    //   console.log("event data onClear:", e);
-    //   //not the right way but works -- change it  pierre
-    //   //destory the element and then make a new one TEST
-    //   // $select2.html("");
-    //   // $select2 = $("#searchName").select2({
-    //   //   data: select2DataObject,
-    //   //   containerCssClass: "search",
-    //   //   placeholder: "Search this tree",
-    //   //   debug: true,
-    //   // });
-    //
-    //   clearAll(tree_root);
-    //   expandAll(tree_root);
-    //   outer_update(tree_root);
-    // });
+    //Event handler to clear teh search bar
+    $searchClear.addEventListener("click", function () {
+      $select2 = $("#searchName").select2({
+        data: select2DataObject,
+        containerCssClass: "search",
+        placeholder: "Search this tree",
+        debug: true,
+      });
+      //reset the color but to the placeholder default
+      if (placeholderStyle) {
+        var test = document.getElementsByClassName(
+          "select2-selection__placeholder"
+        )[0];
+        test.style.color = "#999 !important";
+      }
+
+      $searchClear.style.display = "none";
+
+      clearAll(tree_root);
+      expandAll(tree_root);
+      outer_update(tree_root);
+    });
   }
 }
