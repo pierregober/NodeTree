@@ -537,15 +537,6 @@ function createNodeTree() {
       $drawerBody.style.overflowY = "auto";
 
       //EVENT LISTNERS
-      $drawerBackground.addEventListener("click", function () {
-        $drawerPanel.style.animationDuration = "0.5s";
-        $drawerPanel.style.animationFillMode = "forwards";
-        $drawerPanel.style.animationIterationCount = 1;
-        $drawerPanel.style.animationName = "drawerCloseAnimation";
-        $drawerPanel.style.animationTimingFunction = "ease-out";
-        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
-        $drawerBackground.parentNode.removeChild($drawerBackground);
-      });
 
       //on hover change the back background
       $drawerExit.addEventListener("mouseenter", function () {
@@ -556,16 +547,6 @@ function createNodeTree() {
       $drawerExit.addEventListener("mouseleave", function () {
         $drawerExit.style.backgroundColor = "inherit";
         $drawerExit.style.color = "white";
-      });
-
-      $drawerExit.addEventListener("click", function () {
-        $drawerPanel.style.animationDuration = "0.5s";
-        $drawerPanel.style.animationFillMode = "forwards";
-        $drawerPanel.style.animationIterationCount = 1;
-        $drawerPanel.style.animationName = "drawerCloseAnimation";
-        $drawerPanel.style.animationTimingFunction = "ease-in";
-        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
-        $drawerBackground.parentNode.removeChild($drawerBackground);
       });
 
       //Step 0  - Create the input
@@ -580,6 +561,28 @@ function createNodeTree() {
       $drawerPanel.appendChild($searchPanelField);
       $drawerPanel.appendChild($drawerBody);
       document.body.append($drawerPanel);
+
+      $drawerBackground.addEventListener("click", function () {
+        $drawerPanel.style.animationDuration = "0.5s";
+        $drawerPanel.style.animationFillMode = "forwards";
+        $drawerPanel.style.animationIterationCount = 1;
+        $drawerPanel.style.animationName = "drawerCloseAnimation";
+        $drawerPanel.style.animationTimingFunction = "ease-out";
+        $searchPanelField.value = "";
+        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        $drawerBackground.parentNode.removeChild($drawerBackground);
+      });
+
+      $drawerExit.addEventListener("click", function () {
+        $drawerPanel.style.animationDuration = "0.5s";
+        $drawerPanel.style.animationFillMode = "forwards";
+        $drawerPanel.style.animationIterationCount = 1;
+        $drawerPanel.style.animationName = "drawerCloseAnimation";
+        $drawerPanel.style.animationTimingFunction = "ease-in";
+        $searchPanelField.value = "";
+        $drawerBody.textContent = "";
+        $drawerBackground.parentNode.removeChild($drawerBackground);
+      });
 
       nodeEnter
         .append("circle")
