@@ -20,7 +20,9 @@ function formatPermissions(props) {
     name: props.Member.Title,
     members: (props.Member.Users?.results || []).map(function (member) {
       return {
+        access: accessArr,
         email: member.Email,
+        groupName: props.Member.Title,
         id: member.Id,
         isAdmin: member.IsSiteAdmin,
         title: member.Title,

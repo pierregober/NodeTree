@@ -137,7 +137,6 @@ function createNodeTree() {
 
   //adds values to the array recursively
   function select2DataCollection(d) {
-    console.log("d for the array:", d);
     //collect the names
     if (d.children) d.children.forEach(select2DataCollection);
     //collect the groups + personnel with direct site permissions <= the personnell shoudl be moved to a site group
@@ -148,9 +147,7 @@ function createNodeTree() {
     //collect the personnel
     if (d.people) {
       d.people.forEach(function (person, index) {
-        // if (person.email) {
-        //   console.log("hit0");
-        select2Data.push(person.Title);
+        select2Data.push(person.title);
       });
     }
     //collect the node name
@@ -158,7 +155,6 @@ function createNodeTree() {
   }
 
   function searchTree(d, first_call = false) {
-    console.log("d in search", d);
     if (d.children) d.children.forEach(searchTree);
     //search by node name, group, or people
     if (d.name) {
@@ -168,7 +164,6 @@ function createNodeTree() {
         d.people.find((p) => p.title === searchText)
       ) {
         d.search_target = first_call;
-
         // Walk parent chain
         var ancestors = [];
         var parent = d;
@@ -579,9 +574,14 @@ function createNodeTree() {
         drawerBackground.parentNode.removeChild(drawerBackground);
       });
 
+      //Step 0  - Create the input
+      var $searchPanelField = document.createElement("input");
+      $searchPanelField.style.backgroundColor = "black"; //need to change pierre
+
       drawerHeader.appendChild(drawerTitle);
       drawerHeader.appendChild(drawerExit);
       drawerPanel.appendChild(drawerHeader);
+      drawerPanel.appendChild($searchPanelField);
       drawerPanel.appendChild(drawerBody);
       document.body.append(drawerPanel);
 
@@ -596,7 +596,7 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          console.log("mouseenter event:", d, "\nd3.event", d3.event);
+          //console.log("mouseenter event:", d, "\nd3.event", d3.event);
           //make a conditional that if the tooltip is active then remove
 
           if (d3.event.toElement.localName === "circle") {
@@ -623,7 +623,7 @@ function createNodeTree() {
           groupContainer.id = "tooltipChildCont";
 
           groupContainer.addEventListener("click", function () {
-            console.log("d3.event:", d3.event, "d: ", d);
+            //  console.log("d3.event:", d3.event, "d: ", d);
 
             drawerTitle.innerText = d.name.toUpperCase();
 
@@ -641,15 +641,9 @@ function createNodeTree() {
             //have a collector
             var people = [];
             //make the groups to alphabetical order
-            var sortedGroups = d.groups.sort(function (a, b) {
-              if (a.name < b.name) {
-                return -1;
-              }
-              if (a.name > b.name) {
-                return 1;
-              }
-              return 0;
-            });
+            var sortedGroups = d.groups.sort((a, b) =>
+              a.name.localeCompare(b.name, "en", { ignorePunctuation: true })
+            );
 
             //append my groups first
             sortedGroups.forEach(function (group, index) {
@@ -700,6 +694,104 @@ function createNodeTree() {
           var peopleContainer = document.createElement("div");
           peopleContainer.id = "tooltipChildCont";
 
+          //TESTING you should make this into a prototype new Panel()
+          peopleContainer.addEventListener("click", function () {
+            drawerTitle.innerText = d.name.toUpperCase();
+            //drawer animations
+            drawerPanel.style.animationDuration = "0.5s";
+            drawerPanel.style.animationFillMode = "forwards";
+            drawerPanel.style.animationIterationCount = 1;
+            drawerPanel.style.animationName = "drawerOpenAnimation";
+            drawerPanel.style.animationTimingFunction = "ease-out";
+            //append the background
+            document.body.append(drawerBackground);
+            //alphabetical order
+            var sortedPersonnel = d.people.sort((a, b) => {
+              a.title.localeCompare(b.title, "en", { ignorePunctuation: true });
+            });
+
+            //Step 1 - add event listener to listener for change + sort for matches
+            function updatePersonnelArr(e) {
+              console.log("sortedPeronnel b4 the update:", sortedPersonnel);
+              sortedPersonnel = sortedPersonnel.map((person, index) => {
+                //for now only
+                if (person && person.title.match(e.target.value)) {
+                  //takae out the undefined values
+                  if (person && !person.hasOwnProperty("title")) {
+                    return person;
+                  }
+                }
+              });
+              //clear and popluate the view
+              drawerBody.textContent = "";
+              sortedPersonnel.forEach(function (person, index) {
+                //conditional for undefined vals
+                if (person) {
+                  //seperate into two arrays for actual groups
+                  var personnelCardContainer = document.createElement("div");
+                  personnelCardContainer.id = "drawerCard";
+                  personnelCardContainer.style.backgroundColor = person.duplicate
+                    ? "#8D2A11"
+                    : "inherit";
+                  personnelCardContainer.style.borderBottom =
+                    "1px solid #444444";
+                  var personnelCardPersonnel = document.createElement("div");
+                  personnelCardPersonnel.innerText = person.title;
+                  var personnelCardSubtext0 = document.createElement("div");
+                  personnelCardSubtext0.innerText =
+                    person.access + " - " + person.groupName;
+                  personnelCardSubtext0.style.color = "#999";
+                  personnelCardSubtext0.style.fontSize = ".6rem";
+                  var personnelCardSubtext1 = document.createElement("div");
+                  personnelCardSubtext1.innerText = person.isAdmin
+                    ? "Site Collection Admin"
+                    : "";
+                  personnelCardSubtext1.style.color = "#999";
+                  personnelCardSubtext1.style.fontSize = ".6rem";
+                  personnelCardContainer.appendChild(personnelCardPersonnel);
+                  personnelCardContainer.appendChild(personnelCardSubtext0);
+                  personnelCardContainer.appendChild(personnelCardSubtext1);
+                  drawerBody.appendChild(personnelCardContainer);
+                }
+              });
+            }
+            $searchPanelField.addEventListener("input", updatePersonnelArr);
+
+            //make a clear button
+            //Step  - Create filter buttons
+            //filter the array
+            //by group name, isAdmin
+
+            //NEED TO BREAK THIS OUT  INTO A FUNCTION
+            //append the cards
+            sortedPersonnel.forEach(function (person, index) {
+              //seperate into two arrays for actual groups
+              var personnelCardContainer = document.createElement("div");
+              personnelCardContainer.id = "drawerCard";
+              personnelCardContainer.style.backgroundColor = person.duplicate
+                ? "#8D2A11"
+                : "inherit";
+              personnelCardContainer.style.borderBottom = "1px solid #444444";
+              var personnelCardPersonnel = document.createElement("div");
+              personnelCardPersonnel.innerText = person.title;
+              var personnelCardSubtext0 = document.createElement("div");
+              personnelCardSubtext0.innerText =
+                person.access + " - " + person.groupName;
+              personnelCardSubtext0.style.color = "#999";
+              personnelCardSubtext0.style.fontSize = ".6rem";
+              var personnelCardSubtext1 = document.createElement("div");
+              personnelCardSubtext1.innerText = person.isAdmin
+                ? "Site Collection Admin"
+                : "";
+              personnelCardSubtext1.style.color = "#999";
+              personnelCardSubtext1.style.fontSize = ".6rem";
+              personnelCardContainer.appendChild(personnelCardPersonnel);
+              personnelCardContainer.appendChild(personnelCardSubtext0);
+              personnelCardContainer.appendChild(personnelCardSubtext1);
+              drawerBody.appendChild(personnelCardContainer);
+            });
+          });
+
           //append the child div to parent
           var siteCount = document.createElement("div");
           siteCount.innerText = d.count;
@@ -748,7 +840,7 @@ function createNodeTree() {
 
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
-            console.log("getBoundingClientRect of node:", rect);
+            // console.log("getBoundingClientRect of node:", rect);
             return {
               height: rect.height,
               left: rect.right,
@@ -759,7 +851,7 @@ function createNodeTree() {
 
           function tester(el) {
             const rect = el.getBoundingClientRect();
-            console.log("getBoundingClientRect of tooltip:", rect);
+            // console.log("getBoundingClientRect of tooltip:", rect);
             return {
               height: rect.height,
             };
@@ -777,9 +869,9 @@ function createNodeTree() {
             heightOverflow = 10;
           }
           $tooltip.style.top = heightOverflow + "px";
-          console.log("left", left, "\ntop", top, "\nwidth", width);
-          console.log("calculated left: ", left + width / 2 + "px");
-          console.log("heightOverflow: ", heightOverflow);
+          // console.log("left", left, "\ntop", top, "\nwidth", width);
+          // console.log("calculated left: ", left + width / 2 + "px");
+          // console.log("heightOverflow: ", heightOverflow);
         });
 
       var targetEle = "";
@@ -981,12 +1073,10 @@ function createNodeTree() {
         });
       });
 
-    console.log("select2DataObject: ", select2DataObject);
-
     $select2 = $("#searchName").select2({
       data: select2DataObject,
       containerCssClass: "search",
-      placeholder: "Search this tree",
+      placeholder: "Search personnel name, site group permission, or site name",
       allowClear: true,
       debug: true,
     });
@@ -1034,7 +1124,8 @@ function createNodeTree() {
       $select2 = $("#searchName").select2({
         data: select2DataObject,
         containerCssClass: "search",
-        placeholder: "Search this tree",
+        placeholder:
+          "Search personnel name, site group permission, or site name",
         debug: true,
       });
       //reset the color but to the placeholder default

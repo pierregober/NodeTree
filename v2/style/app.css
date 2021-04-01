@@ -51,6 +51,7 @@
   color: white;
   display: none;
   line-height: 24px;
+  margin-left: 3px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }

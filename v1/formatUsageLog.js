@@ -1,7 +1,7 @@
 function reduceData(cb, data) {
   var location = "";
   var groups = [];
-  var peopleCount = [];
+  var people = [];
   var root = null;
   var newArr = null;
   var masterArr = [];
@@ -26,19 +26,12 @@ function reduceData(cb, data) {
     props.pathname = props.pathname.toLowerCase().split("/");
 
     //Step 3 - Get # people in the groups, filter out by person + remove the dupes
-    peopleCount = props.groups.reduce(function (acc, props) {
-      //First the array is built
-      if (acc.length === 0) {
-        acc.push(props.members);
-      }
-      //Checks if the person isn't there already, if not add
-      props.members.map(function (person, index) {
-        if (acc.indexOf(person) === -1) {
-          acc.push(person);
-        }
+    people = props.groups
+      .reduce((a, b) => a.concat(b.members), [])
+      .map((props, index, arr) => {
+        props.duplicate = arr.filter((p) => p.title === props.title).length > 1;
+        return props;
       });
-      return acc;
-    }, []);
 
     //Step 4 - Prep the data to get ready for the binary search algo by gettting neccesary fields
     var lastItem = "";
@@ -50,7 +43,7 @@ function reduceData(cb, data) {
           parent: null,
           count: 1,
           groups: props.groups,
-          people: peopleCount,
+          people,
           path: location,
         });
         lastItem = path;
@@ -62,7 +55,7 @@ function reduceData(cb, data) {
             parent: lastItem,
             count: 1,
             groups: props.groups,
-            people: peopleCount,
+            people,
             path: location,
           });
           lastItem = path;
