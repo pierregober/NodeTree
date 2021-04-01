@@ -1,5 +1,4 @@
 //Load supporting scripts
-
 var scripts = [
   "sitePermissions.js",
   "worker.js",
@@ -80,29 +79,29 @@ function createNodeTree() {
   var placeholderStyle = null;
   Foundation.global.namespace = ""; // pierre
   //Create the div for the nodeTree + append to content area
-  var initTree = document.createElement("div");
-  initTree.id = "tree-container";
+  var $initTree = document.createElement("div");
+  $initTree.id = "tree-container";
 
   //Create search box + drop down
-  var searchContainer = document.createElement("div");
-  searchContainer.class = "search";
-  var blockContainer = document.createElement("div");
-  blockContainer.id = "block-container";
-  var searchField = document.createElement("div");
-  searchField.id = "searchName";
+  var $searchContainer = document.createElement("div");
+  $searchContainer.class = "search";
+  var $blockContainer = document.createElement("div");
+  $blockContainer.id = "block-container";
+  var $searchField = document.createElement("div");
+  $searchField.id = "searchName";
 
   var $searchClear = document.createElement("div");
   $searchClear.id = "searchClear";
   $searchClear.innerText = "Clear";
 
-  blockContainer.appendChild(searchField);
-  blockContainer.appendChild($searchClear);
-  searchContainer.appendChild(blockContainer);
+  $blockContainer.appendChild($searchField);
+  $blockContainer.appendChild($searchClear);
+  $searchContainer.appendChild($blockContainer);
 
   //Append to the area where webparts go
   var nodeTreeContainer = document.getElementById("contentBox");
-  nodeTreeContainer.appendChild(searchContainer);
-  nodeTreeContainer.appendChild(initTree);
+  nodeTreeContainer.appendChild($searchContainer);
+  nodeTreeContainer.appendChild($initTree);
 
   // for the first initialization
   $("document").ready(function () {
@@ -221,11 +220,6 @@ function createNodeTree() {
   }
 
   function draw_tree(error, treeData) {
-    //for the nodeToolTip
-    var siteCount = "";
-    var groupCount = "";
-    var Count = "";
-
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -518,72 +512,74 @@ function createNodeTree() {
         .on("click", click);
 
       //creaing the drawer for displaying information of the
-      var drawerBackground = document.createElement("div");
-      drawerBackground.id = "drawerBackground";
-      drawerBackground.style.height = window.innerHeight - 1 + "px";
-      drawerBackground.style.width = window.innerWidth - 1 + "px";
+      var $drawerBackground = document.createElement("div");
+      $drawerBackground.id = "drawerBackground";
+      $drawerBackground.style.height = window.innerHeight - 1 + "px";
+      $drawerBackground.style.width = window.innerWidth - 1 + "px";
 
-      var drawerPanel = document.createElement("div");
-      drawerPanel.id = "drawerPanel";
+      var $drawerPanel = document.createElement("div");
+      $drawerPanel.id = "drawerPanel";
 
-      var drawerHeader = document.createElement("div");
-      drawerHeader.id = "drawerHeader";
+      var $drawerHeader = document.createElement("div");
+      $drawerHeader.id = "drawerHeader";
 
-      var drawerTitle = document.createElement("div");
-      drawerTitle.id = "drawerTitle";
+      var $drawerTitle = document.createElement("div");
+      $drawerTitle.id = "drawerTitle";
 
-      var drawerExit = document.createElement("div");
-      drawerExit.id = "drawerExit";
-      drawerExit.innerText = "X";
+      var $drawerExit = document.createElement("div");
+      $drawerExit.id = "drawerExit";
+      $drawerExit.innerText = "X";
 
-      var drawerBody = document.createElement("div");
-      drawerBody.id = "drawerBody";
-      drawerBody.style.color = "white";
-      drawerBody.style.flex = "1";
-      drawerBody.style.overflowY = "auto";
+      var $drawerBody = document.createElement("div");
+      $drawerBody.id = "drawerBody";
+      $drawerBody.style.color = "white";
+      $drawerBody.style.flex = "1";
+      $drawerBody.style.overflowY = "auto";
 
       //EVENT LISTNERS
-      drawerBackground.addEventListener("click", function () {
-        drawerPanel.style.animationDuration = "0.5s";
-        drawerPanel.style.animationFillMode = "forwards";
-        drawerPanel.style.animationIterationCount = 1;
-        drawerPanel.style.animationName = "drawerCloseAnimation";
-        drawerPanel.style.animationTimingFunction = "ease-out";
-        drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
-        drawerBackground.parentNode.removeChild(drawerBackground);
+      $drawerBackground.addEventListener("click", function () {
+        $drawerPanel.style.animationDuration = "0.5s";
+        $drawerPanel.style.animationFillMode = "forwards";
+        $drawerPanel.style.animationIterationCount = 1;
+        $drawerPanel.style.animationName = "drawerCloseAnimation";
+        $drawerPanel.style.animationTimingFunction = "ease-out";
+        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        $drawerBackground.parentNode.removeChild($drawerBackground);
       });
 
       //on hover change the back background
-      drawerExit.addEventListener("mouseenter", function () {
-        drawerExit.style.backgroundColor = "#444444";
+      $drawerExit.addEventListener("mouseenter", function () {
+        $drawerExit.style.backgroundColor = "#444444";
       });
 
       //on mouse leave change the back ground back
-      drawerExit.addEventListener("mouseleave", function () {
-        drawerExit.style.backgroundColor = "inherit";
-        drawerExit.style.color = "white";
+      $drawerExit.addEventListener("mouseleave", function () {
+        $drawerExit.style.backgroundColor = "inherit";
+        $drawerExit.style.color = "white";
       });
 
-      drawerExit.addEventListener("click", function () {
-        drawerPanel.style.animationDuration = "0.5s";
-        drawerPanel.style.animationFillMode = "forwards";
-        drawerPanel.style.animationIterationCount = 1;
-        drawerPanel.style.animationName = "drawerCloseAnimation";
-        drawerPanel.style.animationTimingFunction = "ease-in";
-        drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
-        drawerBackground.parentNode.removeChild(drawerBackground);
+      $drawerExit.addEventListener("click", function () {
+        $drawerPanel.style.animationDuration = "0.5s";
+        $drawerPanel.style.animationFillMode = "forwards";
+        $drawerPanel.style.animationIterationCount = 1;
+        $drawerPanel.style.animationName = "drawerCloseAnimation";
+        $drawerPanel.style.animationTimingFunction = "ease-in";
+        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        $drawerBackground.parentNode.removeChild($drawerBackground);
       });
 
       //Step 0  - Create the input
       var $searchPanelField = document.createElement("input");
-      $searchPanelField.style.backgroundColor = "black"; //need to change pierre
+      $searchPanelField.id = "searchPanel";
+      $searchPanelField.placeholder =
+        "Search group, permission level, or personnel name";
 
-      drawerHeader.appendChild(drawerTitle);
-      drawerHeader.appendChild(drawerExit);
-      drawerPanel.appendChild(drawerHeader);
-      drawerPanel.appendChild($searchPanelField);
-      drawerPanel.appendChild(drawerBody);
-      document.body.append(drawerPanel);
+      $drawerHeader.appendChild($drawerTitle);
+      $drawerHeader.appendChild($drawerExit);
+      $drawerPanel.appendChild($drawerHeader);
+      $drawerPanel.appendChild($searchPanelField);
+      $drawerPanel.appendChild($drawerBody);
+      document.body.append($drawerPanel);
 
       nodeEnter
         .append("circle")
@@ -608,235 +604,243 @@ function createNodeTree() {
           $popover.transition().duration(0).style("opacity", 0.9);
 
           //create my containers
-          var tooltipMainContainer = document.createElement("div");
-          tooltipMainContainer.id = "tooltipMainCont";
+          var $tooltipMainContainer = document.createElement("div");
+          $tooltipMainContainer.id = "tooltipMainCont";
 
-          var tooltipTitle = document.createElement("div");
-          tooltipTitle.id = "tooltipTitle";
-          tooltipTitle.innerText = d.name.toUpperCase();
-          tooltipTitle.style.fontWeight = "400";
+          var $tooltipTitle = document.createElement("div");
+          $tooltipTitle.id = "tooltipTitle";
+          $tooltipTitle.innerText = d.name.toUpperCase();
+          $tooltipTitle.style.fontWeight = "400";
 
-          var trafficContainer = document.createElement("div");
-          trafficContainer.id = "tooltipChildCont";
+          var $trafficContainer = document.createElement("div");
+          $trafficContainer.id = "tooltipChildCont";
 
-          var groupContainer = document.createElement("div");
-          groupContainer.id = "tooltipChildCont";
+          var $groupContainer = document.createElement("div");
+          $groupContainer.id = "tooltipChildCont";
 
-          groupContainer.addEventListener("click", function () {
+          $groupContainer.addEventListener("click", function () {
             //  console.log("d3.event:", d3.event, "d: ", d);
 
-            drawerTitle.innerText = d.name.toUpperCase();
+            $drawerTitle.innerText = d.name.toUpperCase();
 
             //move the drawer back into the view of the user
 
-            drawerPanel.style.animationDuration = "0.5s";
-            drawerPanel.style.animationFillMode = "forwards";
-            drawerPanel.style.animationIterationCount = 1;
-            drawerPanel.style.animationName = "drawerOpenAnimation";
-            drawerPanel.style.animationTimingFunction = "ease-out";
+            $drawerPanel.style.animationDuration = "0.5s";
+            $drawerPanel.style.animationFillMode = "forwards";
+            $drawerPanel.style.animationIterationCount = 1;
+            $drawerPanel.style.animationName = "drawerOpenAnimation";
+            $drawerPanel.style.animationTimingFunction = "ease-out";
 
             //append the background
-            document.body.append(drawerBackground);
+            document.body.append($drawerBackground);
             //iterate through the array of groups
             //have a collector
             var people = [];
             //make the groups to alphabetical order
-            var sortedGroups = d.groups.sort((a, b) =>
-              a.name.localeCompare(b.name, "en", { ignorePunctuation: true })
-            );
+            var sortedGroups = d.groups.sort((a, b) => {
+              return a.name.localeCompare(b.name, "en", {
+                ignorePunctuation: true,
+              });
+            });
+
+            var typedValue = "";
+            function updateGroupArr(e) {
+              var groupArr = sortedGroups.map((group, index) => {
+                typedValue = e.target.value.toLowerCase();
+                //matchthe permission level, or groupNAme
+                if (group) {
+                  if (
+                    group.access.toLowerCase().match(typedValue) ||
+                    group.name.toLowerCase().match(typedValue)
+                  ) {
+                    return group;
+                  }
+                }
+              });
+              //clear and popluate the view
+              $drawerBody.textContent = "";
+              showGroupCards(groupArr);
+            }
+            $searchPanelField.addEventListener("input", updateGroupArr);
 
             //append my groups first
-            sortedGroups.forEach(function (group, index) {
-              //seperate into two arrays for actual groups
-              if (group.isGroup) {
-                var groupCardContainer = document.createElement("div");
-                groupCardContainer.id = "drawerCard";
-                groupCardContainer.style.borderBottom = "1px solid #444444";
-                var groupCardPersonnel = document.createElement("div");
-                groupCardPersonnel.innerText = group.name;
-                var groupCardPermission = document.createElement("div");
-                groupCardPermission.innerText = group.access;
-                groupCardPermission.style.color = "#999";
-                groupCardPermission.style.fontSize = ".6rem";
-                groupCardContainer.appendChild(groupCardPersonnel);
-                groupCardContainer.appendChild(groupCardPermission);
-                drawerBody.appendChild(groupCardContainer);
-              } else {
-                people.push(group);
-              }
-            });
-            //append a didiver for the Panel
-            var panelDivider = document.createElement("div");
-            panelDivider.innerText = "Personnel with Direct Site Permissions";
-            panelDivider.style.backgroundColor = "#444444";
-            panelDivider.style.fontWeight = "600";
-            panelDivider.style.padding = ".5rem";
-            panelDivider.style.textAlign = "center";
-            drawerBody.appendChild(panelDivider);
+            function showGroupCards(props) {
+              people = [];
+              props.forEach(function (group, index) {
+                //seperate into two arrays for actual groups
+                if (group) {
+                  if (group.isGroup) {
+                    var $groupCardContainer = document.createElement("div");
+                    $groupCardContainer.id = "drawerCard";
+                    $groupCardContainer.style.borderBottom =
+                      "1px solid #444444";
+                    var $groupCardPersonnel = document.createElement("div");
+                    $groupCardPersonnel.innerText = group.name;
+                    var $groupCardPermission = document.createElement("div");
+                    $groupCardPermission.innerText = group.access;
+                    $groupCardPermission.style.color = "#999";
+                    $groupCardPermission.style.fontSize = ".6rem";
+                    $groupCardContainer.appendChild($groupCardPersonnel);
+                    $groupCardContainer.appendChild($groupCardPermission);
+                    $drawerBody.appendChild($groupCardContainer);
+                  } else {
+                    people.push(group);
+                  }
+                }
+              });
+              //append a didiver for the Panel
+              var $panelDivider = document.createElement("div");
+              $panelDivider.innerText =
+                "Personnel with Direct Site Permissions";
+              $panelDivider.style.backgroundColor = "#444444";
+              $panelDivider.style.fontWeight = "600";
+              $panelDivider.style.padding = ".5rem";
+              $panelDivider.style.textAlign = "center";
+              $drawerBody.appendChild($panelDivider);
+              $drawerBody.appendChild($panelDivider);
 
-            //append my people afterward
-            people.map(function (person, index) {
-              var groupCardContainer = document.createElement("div");
-              groupCardContainer.id = "drawerCard";
-              groupCardContainer.style.borderBottom = "1px solid #444444";
-              var groupCardPersonnel = document.createElement("div");
-              groupCardPersonnel.innerText = person.name;
-              var groupCardPermission = document.createElement("div");
-              groupCardPermission.innerText = person.access;
-              groupCardPermission.style.color = "#999";
-              groupCardPermission.style.fontSize = ".6rem";
-              groupCardContainer.appendChild(groupCardPersonnel);
-              groupCardContainer.appendChild(groupCardPermission);
-              drawerBody.appendChild(groupCardContainer);
-            });
+              //append my people afterward
+              people.map(function (person, index) {
+                var $groupCardContainer = document.createElement("div");
+                $groupCardContainer.id = "drawerCard";
+                $groupCardContainer.style.borderBottom = "1px solid #444444";
+                var $groupCardPersonnel = document.createElement("div");
+                $groupCardPersonnel.innerText = person.name;
+                var $groupCardPermission = document.createElement("div");
+                $groupCardPermission.innerText = person.access;
+                $groupCardPermission.style.color = "#999";
+                $groupCardPermission.style.fontSize = ".6rem";
+                $groupCardContainer.appendChild($groupCardPersonnel);
+                $groupCardContainer.appendChild($groupCardPermission);
+                $drawerBody.appendChild($groupCardContainer);
+              });
+            }
+            showGroupCards(sortedGroups);
           });
 
-          var peopleContainer = document.createElement("div");
-          peopleContainer.id = "tooltipChildCont";
+          var $peopleContainer = document.createElement("div");
+          $peopleContainer.id = "tooltipChildCont";
 
           //TESTING you should make this into a prototype new Panel()
-          peopleContainer.addEventListener("click", function () {
-            drawerTitle.innerText = d.name.toUpperCase();
+          $peopleContainer.addEventListener("click", function () {
+            $drawerTitle.innerText = d.name.toUpperCase();
             //drawer animations
-            drawerPanel.style.animationDuration = "0.5s";
-            drawerPanel.style.animationFillMode = "forwards";
-            drawerPanel.style.animationIterationCount = 1;
-            drawerPanel.style.animationName = "drawerOpenAnimation";
-            drawerPanel.style.animationTimingFunction = "ease-out";
+            $drawerPanel.style.animationDuration = "0.5s";
+            $drawerPanel.style.animationFillMode = "forwards";
+            $drawerPanel.style.animationIterationCount = 1;
+            $drawerPanel.style.animationName = "drawerOpenAnimation";
+            $drawerPanel.style.animationTimingFunction = "ease-out";
             //append the background
-            document.body.append(drawerBackground);
+            document.body.append($drawerBackground);
             //alphabetical order
             var sortedPersonnel = d.people.sort((a, b) => {
-              a.title.localeCompare(b.title, "en", { ignorePunctuation: true });
+              return a.title.localeCompare(b.title, "en", {
+                ignorePunctuation: true,
+              });
             });
 
             //Step 1 - add event listener to listener for change + sort for matches
+            var typedValue = "";
             function updatePersonnelArr(e) {
-              console.log("sortedPeronnel b4 the update:", sortedPersonnel);
-              sortedPersonnel = sortedPersonnel.map((person, index) => {
-                //for now only
-                if (person && person.title.match(e.target.value)) {
-                  //takae out the undefined values
-                  if (person && !person.hasOwnProperty("title")) {
+              var personnelArr = sortedPersonnel.map((person, index) => {
+                typedValue = e.target.value.toLowerCase();
+                //matchthe personnel, group, or groupNAme
+                if (person) {
+                  if (
+                    person.title.toLowerCase().match(typedValue) ||
+                    person.groupName.toLowerCase().match(typedValue) ||
+                    person.access.toLowerCase().match(typedValue)
+                  ) {
                     return person;
                   }
                 }
               });
               //clear and popluate the view
-              drawerBody.textContent = "";
-              sortedPersonnel.forEach(function (person, index) {
-                //conditional for undefined vals
-                if (person) {
-                  //seperate into two arrays for actual groups
-                  var personnelCardContainer = document.createElement("div");
-                  personnelCardContainer.id = "drawerCard";
-                  personnelCardContainer.style.backgroundColor = person.duplicate
-                    ? "#8D2A11"
-                    : "inherit";
-                  personnelCardContainer.style.borderBottom =
-                    "1px solid #444444";
-                  var personnelCardPersonnel = document.createElement("div");
-                  personnelCardPersonnel.innerText = person.title;
-                  var personnelCardSubtext0 = document.createElement("div");
-                  personnelCardSubtext0.innerText =
-                    person.access + " - " + person.groupName;
-                  personnelCardSubtext0.style.color = "#999";
-                  personnelCardSubtext0.style.fontSize = ".6rem";
-                  var personnelCardSubtext1 = document.createElement("div");
-                  personnelCardSubtext1.innerText = person.isAdmin
-                    ? "Site Collection Admin"
-                    : "";
-                  personnelCardSubtext1.style.color = "#999";
-                  personnelCardSubtext1.style.fontSize = ".6rem";
-                  personnelCardContainer.appendChild(personnelCardPersonnel);
-                  personnelCardContainer.appendChild(personnelCardSubtext0);
-                  personnelCardContainer.appendChild(personnelCardSubtext1);
-                  drawerBody.appendChild(personnelCardContainer);
-                }
-              });
+              $drawerBody.textContent = "";
+              showPersonnelCards(personnelArr);
             }
             $searchPanelField.addEventListener("input", updatePersonnelArr);
 
-            //make a clear button
-            //Step  - Create filter buttons
-            //filter the array
-            //by group name, isAdmin
-
-            //NEED TO BREAK THIS OUT  INTO A FUNCTION
             //append the cards
-            sortedPersonnel.forEach(function (person, index) {
-              //seperate into two arrays for actual groups
-              var personnelCardContainer = document.createElement("div");
-              personnelCardContainer.id = "drawerCard";
-              personnelCardContainer.style.backgroundColor = person.duplicate
-                ? "#8D2A11"
-                : "inherit";
-              personnelCardContainer.style.borderBottom = "1px solid #444444";
-              var personnelCardPersonnel = document.createElement("div");
-              personnelCardPersonnel.innerText = person.title;
-              var personnelCardSubtext0 = document.createElement("div");
-              personnelCardSubtext0.innerText =
-                person.access + " - " + person.groupName;
-              personnelCardSubtext0.style.color = "#999";
-              personnelCardSubtext0.style.fontSize = ".6rem";
-              var personnelCardSubtext1 = document.createElement("div");
-              personnelCardSubtext1.innerText = person.isAdmin
-                ? "Site Collection Admin"
-                : "";
-              personnelCardSubtext1.style.color = "#999";
-              personnelCardSubtext1.style.fontSize = ".6rem";
-              personnelCardContainer.appendChild(personnelCardPersonnel);
-              personnelCardContainer.appendChild(personnelCardSubtext0);
-              personnelCardContainer.appendChild(personnelCardSubtext1);
-              drawerBody.appendChild(personnelCardContainer);
-            });
+            function showPersonnelCards(props) {
+              props.forEach(function (person, index) {
+                if (person) {
+                  //seperate into two arrays for actual groups
+                  var $personnelCardContainer = document.createElement("div");
+                  $personnelCardContainer.id = "drawerCard";
+                  $personnelCardContainer.style.backgroundColor = person.duplicate
+                    ? "rgba(141, 42, 17, 0.5)"
+                    : "inherit";
+                  $personnelCardContainer.style.borderBottom =
+                    "1px solid #444444";
+                  var $personnelCardPersonnel = document.createElement("div");
+                  $personnelCardPersonnel.innerText = person.title;
+                  var $personnelCardSubtext0 = document.createElement("div");
+                  $personnelCardSubtext0.innerText =
+                    person.access + " - " + person.groupName;
+                  $personnelCardSubtext0.style.color = "#999";
+                  $personnelCardSubtext0.style.fontSize = ".6rem";
+                  var $personnelCardSubtext1 = document.createElement("div");
+                  $personnelCardSubtext1.innerText = person.isAdmin
+                    ? "Site Collection Admin"
+                    : "";
+                  $personnelCardSubtext1.style.color = "#999";
+                  $personnelCardSubtext1.style.fontSize = ".6rem";
+                  $personnelCardContainer.appendChild($personnelCardPersonnel);
+                  $personnelCardContainer.appendChild($personnelCardSubtext0);
+                  $personnelCardContainer.appendChild($personnelCardSubtext1);
+                  $drawerBody.appendChild($personnelCardContainer);
+                }
+              });
+            }
+            showPersonnelCards(sortedPersonnel);
           });
 
           //append the child div to parent
-          var siteCount = document.createElement("div");
-          siteCount.innerText = d.count;
-          siteCount.id = "tooltipContCount";
-          var siteTitle = document.createElement("div");
-          siteTitle.innerText = "Traffic";
-          siteTitle.id = "tooltipCont";
-          trafficContainer.appendChild(siteCount);
-          trafficContainer.appendChild(siteTitle);
+          var $siteCount = document.createElement("div");
+          $siteCount.innerText = d.count;
+          $siteCount.id = "tooltipContCount";
+          var $siteTitle = document.createElement("div");
+          $siteTitle.innerText = "Traffic";
+          $siteTitle.id = "tooltipCont";
+          $trafficContainer.appendChild($siteCount);
+          $trafficContainer.appendChild($siteTitle);
 
-          var groupCount = document.createElement("div");
-          groupCount.innerText = d.groups.length;
-          groupCount.id = "tooltipContCount";
-          var groupTitle = document.createElement("div");
-          groupTitle.innerText = "Groups";
-          groupTitle.id = "tooltipCont";
-          groupContainer.appendChild(groupCount);
-          groupContainer.appendChild(groupTitle);
+          var $groupCount = document.createElement("div");
+          $groupCount.innerText = d.groups.length;
+          $groupCount.id = "tooltipContCount";
+          var $groupTitle = document.createElement("div");
+          $groupTitle.innerText = "Groups";
+          $groupTitle.id = "tooltipCont";
+          $groupContainer.appendChild($groupCount);
+          $groupContainer.appendChild($groupTitle);
 
-          var peopleCount = document.createElement("div");
-          peopleCount.innerText = d.people.length;
-          peopleCount.id = "tooltipContCount";
-          var peopleTitle = document.createElement("div");
-          peopleTitle.innerText = "People";
-          peopleTitle.id = "tooltipCont";
-          peopleContainer.appendChild(peopleCount);
-          peopleContainer.appendChild(peopleTitle);
+          var $peopleCount = document.createElement("div");
+          $peopleCount.innerText = d.people.length;
+          $peopleCount.id = "tooltipContCount";
+          var $peopleTitle = document.createElement("div");
+          $peopleTitle.innerText = "People";
+          $peopleTitle.id = "tooltipCont";
+          $peopleContainer.appendChild($peopleCount);
+          $peopleContainer.appendChild($peopleTitle);
 
-          var toolTipButton = document.createElement("div");
-          toolTipButton.id = "toolTipBtn";
-          var toolTipButtonLink = document.createElement("a");
-          toolTipButtonLink.href = d.path;
-          toolTipButtonLink.id = "toolTipBtnLink";
-          toolTipButtonLink.innerText = "Go to site";
-          toolTipButton.appendChild(toolTipButtonLink);
+          var $toolTipButton = document.createElement("div");
+          $toolTipButton.id = "toolTipBtn";
+          var $toolTipButtonLink = document.createElement("a");
+          $toolTipButtonLink.href = d.path;
+          $toolTipButtonLink.id = "toolTipBtnLink";
+          $toolTipButtonLink.innerText = "Go to site";
+          $toolTipButton.appendChild($toolTipButtonLink);
 
           //append the containers to the parent selement
-          tooltipMainContainer.appendChild(tooltipTitle);
-          tooltipMainContainer.appendChild(trafficContainer);
-          tooltipMainContainer.appendChild(groupContainer);
-          tooltipMainContainer.appendChild(peopleContainer);
-          tooltipMainContainer.appendChild(toolTipButton);
+          $tooltipMainContainer.appendChild($tooltipTitle);
+          $tooltipMainContainer.appendChild($trafficContainer);
+          $tooltipMainContainer.appendChild($groupContainer);
+          $tooltipMainContainer.appendChild($peopleContainer);
+          $tooltipMainContainer.appendChild($toolTipButton);
 
           //append the d3 tooltip div
-          $(".node_tooltip").append(tooltipMainContainer);
+          $(".node_tooltip").append($tooltipMainContainer);
 
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
@@ -849,37 +853,24 @@ function createNodeTree() {
             };
           }
 
-          function tester(el) {
-            const rect = el.getBoundingClientRect();
-            // console.log("getBoundingClientRect of tooltip:", rect);
-            return {
-              height: rect.height,
-            };
-          }
-
           var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
-
-          // var { height } = getOffset($tooltip);
-          var { height } = tester($tooltip);
+          var { height } = getOffset($tooltip);
           $tooltip.style.left = left + width / 2 + "px";
           //the top of the event element (node) minus half the height of the tooltip
-          let heightOverflow = top - height; // experiment by not deviding by two --pierre
+          let heightOverflow = top - height;
           if (heightOverflow < 0) {
             heightOverflow = 10;
           }
           $tooltip.style.top = heightOverflow + "px";
-          // console.log("left", left, "\ntop", top, "\nwidth", width);
-          // console.log("calculated left: ", left + width / 2 + "px");
-          // console.log("heightOverflow: ", heightOverflow);
         });
 
-      var targetEle = "";
+      var $hitbox = "";
       node.on("mouseleave", function () {
         //make a conditional to say if the tooltip in focus then dont close
-        targetEle = document.getElementById("hitbox");
+        $hitbox = document.getElementById("hitbox");
 
-        if (!d3.event.toElement.contains(targetEle)) {
+        if (!d3.event.toElement.contains($hitbox)) {
           //the tooltip isn't attache so you lust find a way to grba it and remove ti
           $(".node_tooltip").empty();
           $popover.transition().duration(0).style("opacity", 1e-6);
@@ -1109,8 +1100,7 @@ function createNodeTree() {
       });
 
       $searchClear.style.display = "inherit";
-
-      searchField = "d.name";
+      $searchField = "d.name";
       searchText = e.params.args.data.text;
       firstCall = true;
       searchTree(tree_root, firstCall);
@@ -1135,9 +1125,7 @@ function createNodeTree() {
         )[0];
         test.style.color = "#999 !important";
       }
-
       $searchClear.style.display = "none";
-
       clearAll(tree_root);
       expandAll(tree_root);
       outer_update(tree_root);
