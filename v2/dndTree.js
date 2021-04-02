@@ -843,31 +843,58 @@ function createNodeTree() {
 
           function getOffset(el) {
             const rect = el.getBoundingClientRect();
-            // console.log("getBoundingClientRect of node:", rect);
             return {
-              height: rect.height,
               left: rect.right,
               top: rect.top,
               width: rect.width,
+            };
+          }
+          function getoffsetTooltip(el) {
+            const rect = el.getBoundingClientRect();
+            return {
+              height: rect.height,
               bottom: rect.bottom,
             };
           }
 
           var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
-          var { bottom, height } = getOffset($tooltip);
+          var { bottom, height } = getoffsetTooltip($tooltip);
           $tooltip.style.left = left + width / 2 + "px";
           //the top of the event element (node) minus half the height of the tooltip
           let heightOverflow = top - height;
+          // Adam's work on how the tooltip should be displayed
+          // Step . General Location of Tooltip.
+          // $tooltip.style.left = width / 2 + left + "px";
+          // $tooltip.style.top = height / 2 + top;
+          //
+          // //Case 1. Tooltip is above top of page.
+          // if ($tooltip.style.top < 0) {
+          //   $tooltip.style.top = 10 + "px";
+          // }
+          //
+          // //Case 2. Tooltip is below bottom of page.
+          // if ($tooltip.style.bottom > window.innerHeight) {
+          //   $tooltip.style.bottom = window.innerHeight + 10 + "px";
+          // }
+          //
+          // //Case 3. Tooltip is outside right of page.
+          // if ($tooltip.style.right > window.innerWidth) {
+          //   $tooltip.style.left =
+          //     width / 2 + left - $tooltip.style.width + "px";
+          // }
           if (heightOverflow < 0) {
             heightOverflow = 10;
+            // console.log("hit0", heightOverflow);
           }
-
-          if (bottom >= window.innerHeight) {
-            heightOverflow =
-              heightOverflow - 30 - (bottom - window.innerHeight);
-            console.log(heightOverflow);
-          }
+          // else if (bottom > window.innerHeight) {
+          //   heightOverflow = window.innerHeight - 10 - height;
+          // console.log(
+          //   "hit1",
+          //   heightOverflow,
+          //   2 * height - window.innerHeight - 10
+          // );
+          // }
           $tooltip.style.top = heightOverflow + "px";
         });
 
