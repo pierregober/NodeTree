@@ -30,6 +30,10 @@
   display: none !important;
 }
 
+#s4-workspace {
+  overflow-x: hidden !important;
+}
+
 #sideNavBox {
   display: none !important;
 }

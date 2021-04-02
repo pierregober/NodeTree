@@ -553,7 +553,7 @@ function createNodeTree() {
       var $searchPanelField = document.createElement("input");
       $searchPanelField.id = "searchPanel";
       $searchPanelField.placeholder =
-        "Search group, permission level, or personnel name";
+        "Search by group, permission level, or personnel name";
 
       $drawerHeader.appendChild($drawerTitle);
       $drawerHeader.appendChild($drawerExit);
@@ -622,12 +622,8 @@ function createNodeTree() {
           $groupContainer.id = "tooltipChildCont";
 
           $groupContainer.addEventListener("click", function () {
-            //  console.log("d3.event:", d3.event, "d: ", d);
-
             $drawerTitle.innerText = d.name.toUpperCase();
-
             //move the drawer back into the view of the user
-
             $drawerPanel.style.animationDuration = "0.5s";
             $drawerPanel.style.animationFillMode = "forwards";
             $drawerPanel.style.animationIterationCount = 1;
@@ -853,17 +849,24 @@ function createNodeTree() {
               left: rect.right,
               top: rect.top,
               width: rect.width,
+              bottom: rect.bottom,
             };
           }
 
           var { left, top, width } = getOffset(d3.event.path[0]); //this is the node
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
-          var { height } = getOffset($tooltip);
+          var { bottom, height } = getOffset($tooltip);
           $tooltip.style.left = left + width / 2 + "px";
           //the top of the event element (node) minus half the height of the tooltip
           let heightOverflow = top - height;
           if (heightOverflow < 0) {
             heightOverflow = 10;
+          }
+
+          if (bottom >= window.innerHeight) {
+            heightOverflow =
+              heightOverflow - 30 - (bottom - window.innerHeight);
+            console.log(heightOverflow);
           }
           $tooltip.style.top = heightOverflow + "px";
         });
