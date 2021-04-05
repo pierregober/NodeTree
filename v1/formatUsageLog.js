@@ -7,6 +7,7 @@ function reduceData(cb, data) {
   var masterArr = [];
   var test = null;
   data.forEach(function (props, idx) {
+    console.log("in formatter: ", props);
     //Step 1 - Format the pathname names
     location = props.pathname;
 

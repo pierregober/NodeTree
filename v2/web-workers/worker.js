@@ -54,16 +54,12 @@ self.addEventListener("message", function (e) {
     var promise1 = _getRequest(Object.assign(e.data, { qs: e.data.qs1 }));
     var promise2 = _getRequest(Object.assign(e.data, { qs: e.data.qs2 }));
 
-    Promise.all([promise1, promise2])
-      .then(function ([data1, data2]) {
-        self.postMessage({
-          permissions: data2.d.results.map(formatPermissions),
-          sites: data1.d.results.map(formatSites),
-          url: e.data.url,
-        });
-      })
-      .catch(function (e) {
-        console.log("Error in Promise: ", e);
+    Promise.all([promise1, promise2]).then(function ([data1, data2]) {
+      self.postMessage({
+        permissions: data2.d.results.map(formatPermissions),
+        sites: data1.d.results.map(formatSites),
+        url: e.data.url,
       });
+    });
   }
 });
