@@ -49,7 +49,7 @@ function getTreeData(cb) {
     ]);
     //Step 1b: Reset the timer to allow the another request to finish
     clearTimeout(timer);
-    timer = setTimeout(completion, 300);
+    timer = setTimeout(completion, 500);
     //Step 2: Interate through that sites subsites (if any)
     e.data.sites.forEach(function (props) {
       sharePointWorker.postMessage({

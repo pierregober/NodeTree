@@ -1,3 +1,24 @@
+//******************************************************************************
+//***************      Classification: UNCLASSFIED       ***********************
+/*******************************************************************************
+    Author: Pierre Gober, 2021
+    Section: IMEF IMO
+    Version: 1.0 April 7, 2021
+    -----------------------------------------------------------------------
+    Description: The data visualized solution for a site collection that
+    showcases not only the site collection structure but the site groups for
+    sites, personnel with direct site premissions, site usgage rating, count
+    site groups and personnel who have other than normal access and it
+    highlights discepencies in permission groups for the personnel; indictes
+    duplicates. Also has a node tree search where you can search by
+    personnel, site group or site name. It will height if a match is found.
+    Panning and zooming feature to enhance visability of the tree sections.
+    -----------------------------------------------------------------------
+    Comments: The usage rating has not been configured just yet. Will come in
+    next verison.
+    -----------------------------------------------------------------------
+*******************************************************************************/
+
 //Load supporting scripts
 var scripts = [
   "sitePermissions.js",
@@ -74,7 +95,6 @@ var links = [
 function createNodeTree() {
   var $select2 = null;
   var placeholderStyle = null;
-  //Foundation.global.namespace = ""; // pierre
   //Create the div for the nodeTree + append to content area
   var $initTree = document.createElement("div");
   $initTree.id = "tree-container";
@@ -122,8 +142,7 @@ function createNodeTree() {
   });
 
   function close_modal() {
-    // Removed to reduce weight
-    // $(document).foundation("reveal", "close");
+    // Removed to reduce weight from foundation framework
   }
 
   var tree_root;
@@ -155,9 +174,13 @@ function createNodeTree() {
     //search by node name, group, or people
     if (d.name) {
       if (
-        d.groups.find((g) => g.name === searchText) ||
+        d.groups.find(function (g) {
+          g.name === searchText;
+        }) ||
         d.name.match(searchText) ||
-        d.people.find((p) => p.title === searchText)
+        d.people.find(function (p) {
+          p.title === searchText;
+        })
       ) {
         d.search_target = first_call;
         // Walk parent chain
@@ -633,7 +656,7 @@ function createNodeTree() {
             //have a collector
             var people = [];
             //make the groups to alphabetical order
-            var sortedGroups = d.groups.sort((a, b) => {
+            var sortedGroups = d.groups.sort(function (a, b) {
               return a.name.localeCompare(b.name, "en", {
                 ignorePunctuation: true,
               });
@@ -641,7 +664,7 @@ function createNodeTree() {
 
             var typedValue = "";
             function updateGroupArr(e) {
-              var groupArr = sortedGroups.map((group, index) => {
+              var groupArr = sortedGroups.map(function (group, index) {
                 typedValue = e.target.value.toLowerCase();
                 //matchthe permission level, or groupNAme
                 if (group) {
@@ -729,7 +752,7 @@ function createNodeTree() {
             //append the background
             document.body.append($drawerBackground);
             //alphabetical order
-            var sortedPersonnel = d.people.sort((a, b) => {
+            var sortedPersonnel = d.people.sort(function (a, b) {
               return a.title.localeCompare(b.title, "en", {
                 ignorePunctuation: true,
               });
@@ -738,7 +761,7 @@ function createNodeTree() {
             //Step 1 - add event listener to listener for change + sort for matches
             var typedValue = "";
             function updatePersonnelArr(e) {
-              var personnelArr = sortedPersonnel.map((person, index) => {
+              var personnelArr = sortedPersonnel.map(function (person, index) {
                 typedValue = e.target.value.toLowerCase();
                 //matchthe personnel, group, or groupNAme
                 if (person) {
@@ -824,6 +847,7 @@ function createNodeTree() {
           $toolTipButton.id = "toolTipBtn";
           var $toolTipButtonLink = document.createElement("a");
           $toolTipButtonLink.href = d.path;
+          $toolTipButtonLink.target = "_blank";
           $toolTipButtonLink.id = "toolTipBtnLink";
           $toolTipButtonLink.innerText = "Go to site";
           $toolTipButton.appendChild($toolTipButtonLink);

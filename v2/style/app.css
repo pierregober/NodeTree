@@ -259,6 +259,7 @@ div.node_tooltip a:active {
 }
 #tooltipChildCont:hover {
   background-color: #2d2d2d;
+  cursor: pointer;
 }
 
 #tooltipCont {
