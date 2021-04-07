@@ -9,9 +9,6 @@ var scripts = [
   "nodeTreeV2/vendors/placeholder.js",
   "nodeTreeV2/vendors/select2.min.js",
   "nodeTreeV2/d3-context-menu.js",
-  "nodeTreeV2/foundation.min.js",
-  "nodeTreeV2/foundation.alert.js",
-  "nodeTreeV2/foundation.reveal.js",
 ];
 
 var links = [
@@ -77,7 +74,7 @@ var links = [
 function createNodeTree() {
   var $select2 = null;
   var placeholderStyle = null;
-  Foundation.global.namespace = ""; // pierre
+  //Foundation.global.namespace = ""; // pierre
   //Create the div for the nodeTree + append to content area
   var $initTree = document.createElement("div");
   $initTree.id = "tree-container";
@@ -105,7 +102,6 @@ function createNodeTree() {
 
   // for the first initialization
   $("document").ready(function () {
-    $(document).foundation();
     $(document).on("opened", "[data-reveal]", function () {
       var element = $(".inputName:visible").first();
       element.focus(function () {
@@ -126,7 +122,8 @@ function createNodeTree() {
   });
 
   function close_modal() {
-    $(document).foundation("reveal", "close");
+    // Removed to reduce weight
+    // $(document).foundation("reveal", "close");
   }
 
   var tree_root;
