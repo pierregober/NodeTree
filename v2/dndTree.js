@@ -1,25 +1,32 @@
-//******************************************************************************
-//***************      Classification: UNCLASSFIED       ***********************
 /*******************************************************************************
+*****************      Classification: UNCLASSIFIED       **********************
+********************************************************************************
     Author: Pierre Gober, 2021
     Section: IMEF IMO
     Version: 1.0 April 7, 2021
     -----------------------------------------------------------------------
     Description: The data visualized solution for a site collection that
-    showcases not only the site collection structure but the site groups for
-    sites, personnel with direct site premissions, site usgage rating, count
-    site groups and personnel who have other than normal access and it
-    highlights discepencies in permission groups for the personnel; indictes
-    duplicates. Also has a node tree search where you can search by
-    personnel, site group or site name. It will height if a match is found.
-    Panning and zooming feature to enhance visability of the tree sections.
+    showcases not only the site collection hierarchical structure but the
+    site permission groups for sites, personnel with direct site premissions,
+    site usgage rating, count site groups and personnel who have other than
+    normal access and it highlights discepencies in permission groups for
+    the personnel; indicates duplicates. Also has a node tree search where you
+    can search by personnel, site group or site name. It will highlight if a
+    match is found. Panning and zooming feature to enhance visability of
+    the tree sections.
     -----------------------------------------------------------------------
-    Comments: The usage rating has not been configured just yet. Will come in
-    next verison.
+    Comments: Site assests should be in the parent site. The current
+    configuration is for imef/siteAssests/ims The usage rating has not been
+    configured just yet. Will come in the next verison. Vars that begin with
+    a dollar sign ($example) indicates that it's a reference to a HTML DOM
+    element. Not to get confused with the jQuery selector $() method. Serveral
+    elements native to sharepoint are display none or removed to proper display
+    the entire tree. For more information on the elements removed head to the
+    app.js.
     -----------------------------------------------------------------------
 *******************************************************************************/
 
-//Load supporting scripts
+//Define supporting scripts
 var scripts = [
   "sitePermissions.js",
   "worker.js",
@@ -30,8 +37,12 @@ var scripts = [
   "nodeTreeV2/vendors/placeholder.js",
   "nodeTreeV2/vendors/select2.min.js",
   "nodeTreeV2/d3-context-menu.js",
+  "nodeTreeV2/foundation.min.js",
+  "nodeTreeV2/foundation.alert.js",
+  "nodeTreeV2/foundation.reveal.js",
 ];
 
+//Define supporting links for styling
 var links = [
   "nodeTreeV2/styles/select2.min.css",
   "nodeTreeV2/styles/app.css",
@@ -39,14 +50,16 @@ var links = [
 ];
 
 (function () {
+  //Step 0: Construct the styling
   function linkBuilder(path) {
     var link = document.createElement("link");
-    link.type = "text/css";
-    link.rel = "stylesheet";
     link.href = _spPageContextInfo.webAbsoluteUrl + "/SiteAssets/ims/" + path;
+    link.rel = "stylesheet";
+    link.type = "text/css";
     document.head.appendChild(link);
     return link;
   }
+  //Step 1: Load the styling
   function loadLinks() {
     links = Object.keys(
       links.reduce(function (acc, path, index) {
@@ -63,16 +76,18 @@ var links = [
   }
   loadLinks();
 
+  //Step 2: Construct the dependencies
   function scriptBuilder(path) {
     var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = _spPageContextInfo.webAbsoluteUrl + "/SiteAssets/ims/" + path;
-    script.defer = true;
     script.async = false;
+    script.defer = true;
+    script.src = _spPageContextInfo.webAbsoluteUrl + "/SiteAssets/ims/" + path;
+    script.type = "text/javascript";
     document.body.appendChild(script);
     return script;
   }
 
+  //Step 3: Load the dependencies
   function loadScripts() {
     scripts = Object.keys(
       scripts.reduce(function (acc, path, index) {
@@ -84,6 +99,7 @@ var links = [
     scripts.map(scriptBuilder).map(function (script, i) {
       if (i == scripts.length - 1) {
         script.addEventListener("load", function () {
+          //Step 4: Initialize the tree
           createNodeTree();
         });
       }
@@ -95,11 +111,12 @@ var links = [
 function createNodeTree() {
   var $select2 = null;
   var placeholderStyle = null;
-  //Create the div for the nodeTree + append to content area
+  Foundation.global.namespace = "";
+  //Step 5: Create the container for the tree + append to content area
   var $initTree = document.createElement("div");
   $initTree.id = "tree-container";
 
-  //Create search box + drop down
+  //Step 6: Create search box + drop down
   var $searchContainer = document.createElement("div");
   $searchContainer.class = "search";
   var $blockContainer = document.createElement("div");
@@ -115,13 +132,14 @@ function createNodeTree() {
   $blockContainer.appendChild($searchClear);
   $searchContainer.appendChild($blockContainer);
 
-  //Append to the area where webparts go
+  //Step 7: Append to the container
   var nodeTreeContainer = document.getElementById("contentBox");
   nodeTreeContainer.appendChild($searchContainer);
   nodeTreeContainer.appendChild($initTree);
 
-  // for the first initialization
+  //Step 8: First initialization of the tree
   $("document").ready(function () {
+    $(document).foundation();
     $(document).on("opened", "[data-reveal]", function () {
       var element = $(".inputName:visible").first();
       element.focus(function () {
@@ -130,20 +148,16 @@ function createNodeTree() {
       element.focus();
     });
 
-    //callback to get treeData
+    //Step 9: Get the tree data
     function cb(error, props) {
       if (error) {
-        console.log(error);
+        console.error(error);
         return;
       }
       draw_tree(null, props);
     }
     getTreeData(cb);
   });
-
-  function close_modal() {
-    // Removed to reduce weight from foundation framework
-  }
 
   var tree_root;
   outer_update = null;
@@ -154,7 +168,8 @@ function createNodeTree() {
   function select2DataCollection(d) {
     //collect the names
     if (d.children) d.children.forEach(select2DataCollection);
-    //collect the groups + personnel with direct site permissions <= the personnell shoudl be moved to a site group
+    //collect the groups + personnel with direct site permissions <= the
+    //personnell shoudl be moved to a site group
     if (d.groups)
       d.groups.forEach(function (group, index) {
         select2Data.push(group.name);
@@ -171,7 +186,7 @@ function createNodeTree() {
 
   function searchTree(d, first_call = false) {
     if (d.children) d.children.forEach(searchTree);
-    //search by node name, group, or people
+    //Search by node name, group, or people
     if (d.name) {
       if (
         d.groups.find(function (g) {
@@ -183,7 +198,7 @@ function createNodeTree() {
         })
       ) {
         d.search_target = first_call;
-        // Walk parent chain
+        //Walk parent chain
         var ancestors = [];
         var parent = d;
         while (typeof parent !== "undefined") {
@@ -224,7 +239,6 @@ function createNodeTree() {
   function centerSearchTarget(d) {
     if (d.search_target) {
       outer_centerNode(d);
-      //console.log("Found search target: " + d.name);
     }
     if (d.children) {
       d.children.forEach(centerSearchTarget);
@@ -239,31 +253,36 @@ function createNodeTree() {
     } else if (d.children) d.children.forEach(expandAll);
   }
 
+  function close_modal() {
+    $(document).foundation("reveal", "close");
+  }
+
   function draw_tree(error, treeData) {
-    // Calculate total nodes, max label length
+    //Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
-    // panning variables
+    //Panning variables
     var panSpeed = 200;
-    var panBoundary = 20; // Within 20px from edges will pan when dragging.
-    // Misc. variables
+    //Within 20px from edges will pan when dragging.
+    var panBoundary = 20;
+    //Misc. variables
     var i = 0;
     var duration = 750;
     var root;
 
-    // size of the diagram
+    //Size of the diagram
     var viewerWidth = $(document).width();
     var viewerHeight = $(document).height();
 
     var tree = d3.layout.tree().size([viewerHeight, viewerWidth]);
 
-    // define a d3 diagonal projection for use by the node paths later on.
+    //Define a d3 diagonal projection for use by the node paths later on
     var diagonal = d3.svg.diagonal().projection(function (d) {
       return [d.y, d.x];
     });
 
-    // A recursive helper function for performing some setup by walking through all nodes
-
+    //A recursive helper function for performing some setup by walking through
+    //all nodes
     function visit(parent, visitFn, childrenFn) {
       if (!parent) return;
 
@@ -278,7 +297,7 @@ function createNodeTree() {
       }
     }
 
-    // Call visit function to establish maxLabelLength
+    //Call visit function to establish maxLabelLength
     visit(
       treeData,
       function (d) {
@@ -290,6 +309,7 @@ function createNodeTree() {
       }
     );
 
+    //A method to delete sites -- later functionality
     function delete_node(node) {
       visit(
         treeData,
@@ -310,18 +330,15 @@ function createNodeTree() {
       );
     }
 
-    // sort the tree according to the node names
-
+    //Step 10: Sort the tree according to the node names
     function sortTree() {
       tree.sort(function (a, b) {
         return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
       });
     }
-    // Sort the tree initially incase the JSON isn't in a sorted order.
     sortTree();
 
-    // TODO: Pan function, can be better implemented.
-
+    //Panning function
     function pan(domNode, direction) {
       var speed = panSpeed;
       if (panTimer) {
@@ -369,8 +386,7 @@ function createNodeTree() {
       }
     }
 
-    // Define the zoom function for the zoomable tree
-
+    //Define the zoom function
     function zoom() {
       svgGroup.attr(
         "transform",
@@ -378,13 +394,14 @@ function createNodeTree() {
       );
     }
 
-    // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
+    //Define the zoomListener which calls the zoom function on the "zoom" event
+    //constrained within the scaleExtents
     var zoomListener = d3.behavior
       .zoom()
       .scaleExtent([0.1, 3])
       .on("zoom", zoom);
 
-    //adding a additional div for the hit box --pierre
+    //Step 11: Adding a parent div for the hit box
     var $popover = d3
       .select("#tree-container")
       .append("div")
@@ -393,7 +410,8 @@ function createNodeTree() {
       .attr("class", "node_tooltip")
       .style("opacity", 0);
 
-    // define the baseSvg, attaching a class for styling and the zoomListener
+    //Step 12: Define the baseSvg, attaching a class for styling and
+    //the zoomListener
     var baseSvg = d3
       .select("#tree-container")
       .append("svg")
@@ -408,8 +426,7 @@ function createNodeTree() {
 
     baseSvg.call(zoomListener);
 
-    // Helper functions for collapsing and expanding nodes.
-
+    //Helper functions for collapsing and expanding nodes.
     function collapse(d) {
       if (d.children) {
         d._children = d.children;
@@ -428,24 +445,22 @@ function createNodeTree() {
 
     var overCircle = function (d) {
       selectedNode = d;
-      console.log("overCircle: ", selectedNode);
       updateTempConnector();
     };
     var outCircle = function (d) {
       selectedNode = null;
-      console.log("outCircle: ", selectedNode);
       updateTempConnector();
     };
 
-    // color a node properly
+    //Step 13: Color the node + if found different color for node
     function colorNode(d) {
       result = "#777";
-      if (d.class === "found") result = "#3949ab"; //pierre changed the node found color
+      if (d.class === "found") result = "#3949ab"; //Standard IMS base color
       return result;
     }
 
-    // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
-
+    //Function to center node when clicked/dropped so node doesn't get lost
+    //when collapsing/moving with large amount of children
     function centerNode(source) {
       scale = zoomListener.scale();
       x = -source.y0;
@@ -463,8 +478,7 @@ function createNodeTree() {
       zoomListener.translate([x, y]);
     }
 
-    // Toggle children function
-
+    //Toggle children function
     function toggleChildren(d) {
       if (d.children) {
         d._children = d.children;
@@ -476,19 +490,21 @@ function createNodeTree() {
       return d;
     }
 
-    // Toggle children on click.
-
+    //Toggle children on click.
     function click(d) {
-      if (d3.event.defaultPrevented) return; // click suppressed
+      //Click suppressed
+      if (d3.event.defaultPrevented) return;
       d = toggleChildren(d);
       update(d);
       centerNode(d);
     }
 
     function update(source) {
-      // Compute the new height, function counts total children of root node and sets tree height accordingly.
-      // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
-      // This makes the layout more consistent.
+      //Compute the new height, function counts total children of root node and
+      //sets tree height accordingly.
+      //This prevents the layout looking squashed when new nodes are made
+      //visible or looking sparse when nodes are removed
+      //This makes the layout more consistent.
       var levelWidth = [1];
       var childCount = function (level, n) {
         if (n.children && n.children.length > 0) {
@@ -504,24 +520,24 @@ function createNodeTree() {
       var newHeight = d3.max(levelWidth) * 45; // 45 pixels per line
       tree = tree.size([newHeight, viewerWidth]);
 
-      // Compute the new tree layout.
+      //Compute the new tree layout.
       var nodes = tree.nodes(root).reverse(),
         links = tree.links(nodes);
 
-      // Set widths between levels based on maxLabelLength.
+      //Set widths between levels based on maxLabelLength.
       nodes.forEach(function (d) {
         //d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
-        // alternatively to keep a fixed scale one can set a fixed depth per level
-        // Normalize for fixed-depth by commenting out below line
+        //alternatively to keep a fixed scale one can set a fixed depth per level
+        //Normalize for fixed-depth by commenting out below line
         d.y = d.depth * 300; //500px per level.
       });
 
-      // Update the nodes…
+      //Update the nodes…
       node = svgGroup.selectAll("g.node").data(nodes, function (d) {
         return d.id || (d.id = ++i);
       });
 
-      // Enter any new nodes at the parent's previous position.
+      //Enter any new nodes at the parent's previous position.
       var nodeEnter = node
         .enter()
         .append("g")
@@ -589,7 +605,7 @@ function createNodeTree() {
         $drawerPanel.style.animationName = "drawerCloseAnimation";
         $drawerPanel.style.animationTimingFunction = "ease-out";
         $searchPanelField.value = "";
-        $drawerBody.textContent = ""; //removes all child elements doesn't invoke HTML parser
+        $drawerBody.textContent = ""; //Removes child elements
         $drawerBackground.parentNode.removeChild($drawerBackground);
       });
 
@@ -615,18 +631,14 @@ function createNodeTree() {
           }
         })
         .on("mouseenter", function (d) {
-          //console.log("mouseenter event:", d, "\nd3.event", d3.event);
-          //make a conditional that if the tooltip is active then remove
-
+          //Conditional that if the tooltip is active then remove
           if (d3.event.toElement.localName === "circle") {
             $(".node_tooltip").empty();
             $popover.transition().duration(0).style("opacity", 1e-6);
           }
-
-          //tooltipInfo = nodeToolTip(d);
           $popover.transition().duration(0).style("opacity", 0.9);
 
-          //create my containers
+          //Create my containers
           var $tooltipMainContainer = document.createElement("div");
           $tooltipMainContainer.id = "tooltipMainCont";
 
@@ -643,19 +655,19 @@ function createNodeTree() {
 
           $groupContainer.addEventListener("click", function () {
             $drawerTitle.innerText = d.name.toUpperCase();
-            //move the drawer back into the view of the user
+            //Move the drawer back into the view of the user
             $drawerPanel.style.animationDuration = "0.5s";
             $drawerPanel.style.animationFillMode = "forwards";
             $drawerPanel.style.animationIterationCount = 1;
             $drawerPanel.style.animationName = "drawerOpenAnimation";
             $drawerPanel.style.animationTimingFunction = "ease-out";
 
-            //append the background
+            //Append the background
             document.body.append($drawerBackground);
-            //iterate through the array of groups
-            //have a collector
+            //Iterate through the array of groups
+            //Make a collector
             var people = [];
-            //make the groups to alphabetical order
+            //Make the groups to alphabetical order
             var sortedGroups = d.groups.sort(function (a, b) {
               return a.name.localeCompare(b.name, "en", {
                 ignorePunctuation: true,
@@ -666,7 +678,7 @@ function createNodeTree() {
             function updateGroupArr(e) {
               var groupArr = sortedGroups.map(function (group, index) {
                 typedValue = e.target.value.toLowerCase();
-                //matchthe permission level, or groupNAme
+                //Match the permission level, or groupNAme
                 if (group) {
                   if (
                     group.access.toLowerCase().match(typedValue) ||
@@ -676,17 +688,17 @@ function createNodeTree() {
                   }
                 }
               });
-              //clear and popluate the view
+              //Clear and popluate the view
               $drawerBody.textContent = "";
               showGroupCards(groupArr);
             }
             $searchPanelField.addEventListener("input", updateGroupArr);
 
-            //append my groups first
+            //Append my groups first
             function showGroupCards(props) {
               people = [];
               props.forEach(function (group, index) {
-                //seperate into two arrays for actual groups
+                //Seperate into two arrays for actual groups
                 if (group) {
                   if (group.isGroup) {
                     var $groupCardContainer = document.createElement("div");
@@ -707,7 +719,7 @@ function createNodeTree() {
                   }
                 }
               });
-              //append a didiver for the Panel
+              //Append a divider for the Panel
               var $panelDivider = document.createElement("div");
               $panelDivider.innerText =
                 "Personnel with Direct Site Permissions";
@@ -718,7 +730,7 @@ function createNodeTree() {
               $drawerBody.appendChild($panelDivider);
               $drawerBody.appendChild($panelDivider);
 
-              //append my people afterward
+              //Append the personnel afterward
               people.map(function (person, index) {
                 var $groupCardContainer = document.createElement("div");
                 $groupCardContainer.id = "drawerCard";
@@ -740,10 +752,9 @@ function createNodeTree() {
           var $peopleContainer = document.createElement("div");
           $peopleContainer.id = "tooltipChildCont";
 
-          //TESTING you should make this into a prototype new Panel()
           $peopleContainer.addEventListener("click", function () {
             $drawerTitle.innerText = d.name.toUpperCase();
-            //drawer animations
+            //Drawer animations
             $drawerPanel.style.animationDuration = "0.5s";
             $drawerPanel.style.animationFillMode = "forwards";
             $drawerPanel.style.animationIterationCount = 1;
@@ -758,12 +769,12 @@ function createNodeTree() {
               });
             });
 
-            //Step 1 - add event listener to listener for change + sort for matches
+            //Add event listener to listener for change + sort for matches
             var typedValue = "";
             function updatePersonnelArr(e) {
               var personnelArr = sortedPersonnel.map(function (person, index) {
                 typedValue = e.target.value.toLowerCase();
-                //matchthe personnel, group, or groupNAme
+                //Match the personnel, group, or groupName
                 if (person) {
                   if (
                     person.title.toLowerCase().match(typedValue) ||
@@ -774,17 +785,17 @@ function createNodeTree() {
                   }
                 }
               });
-              //clear and popluate the view
+              //Clear and popluate the view
               $drawerBody.textContent = "";
               showPersonnelCards(personnelArr);
             }
             $searchPanelField.addEventListener("input", updatePersonnelArr);
 
-            //append the cards
+            //Append the cards
             function showPersonnelCards(props) {
               props.forEach(function (person, index) {
                 if (person) {
-                  //seperate into two arrays for actual groups
+                  //Seperate into two arrays for actual groups
                   var $personnelCardContainer = document.createElement("div");
                   $personnelCardContainer.id = "drawerCard";
                   $personnelCardContainer.style.backgroundColor = person.duplicate
@@ -815,7 +826,7 @@ function createNodeTree() {
             showPersonnelCards(sortedPersonnel);
           });
 
-          //append the child div to parent
+          //Append the child div to parent
           var $siteCount = document.createElement("div");
           $siteCount.innerText = d.count;
           $siteCount.id = "tooltipContCount";
@@ -852,14 +863,14 @@ function createNodeTree() {
           $toolTipButtonLink.innerText = "Go to site";
           $toolTipButton.appendChild($toolTipButtonLink);
 
-          //append the containers to the parent selement
+          //Append the containers to the parent selement
           $tooltipMainContainer.appendChild($tooltipTitle);
           $tooltipMainContainer.appendChild($trafficContainer);
           $tooltipMainContainer.appendChild($groupContainer);
           $tooltipMainContainer.appendChild($peopleContainer);
           $tooltipMainContainer.appendChild($toolTipButton);
 
-          //append the d3 tooltip div
+          //Append the d3 tooltip div
           $(".node_tooltip").append($tooltipMainContainer);
 
           function getOffset(el) {
@@ -882,50 +893,19 @@ function createNodeTree() {
           var $tooltip = document.getElementById("hitbox"); //this is the tooltip
           var { bottom, height } = getoffsetTooltip($tooltip);
           $tooltip.style.left = left + width / 2 + "px";
-          //the top of the event element (node) minus half the height of the tooltip
+          //The top of the event element (node) minus half the height of the tooltip
           let heightOverflow = top - height;
-          // Adam's work on how the tooltip should be displayed
-          // Step . General Location of Tooltip.
-          // $tooltip.style.left = width / 2 + left + "px";
-          // $tooltip.style.top = height / 2 + top;
-          //
-          // //Case 1. Tooltip is above top of page.
-          // if ($tooltip.style.top < 0) {
-          //   $tooltip.style.top = 10 + "px";
-          // }
-          //
-          // //Case 2. Tooltip is below bottom of page.
-          // if ($tooltip.style.bottom > window.innerHeight) {
-          //   $tooltip.style.bottom = window.innerHeight + 10 + "px";
-          // }
-          //
-          // //Case 3. Tooltip is outside right of page.
-          // if ($tooltip.style.right > window.innerWidth) {
-          //   $tooltip.style.left =
-          //     width / 2 + left - $tooltip.style.width + "px";
-          // }
           if (heightOverflow < 0) {
             heightOverflow = 10;
-            // console.log("hit0", heightOverflow);
           }
-          // else if (bottom > window.innerHeight) {
-          //   heightOverflow = window.innerHeight - 10 - height;
-          // console.log(
-          //   "hit1",
-          //   heightOverflow,
-          //   2 * height - window.innerHeight - 10
-          // );
-          // }
           $tooltip.style.top = heightOverflow + "px";
         });
 
       var $hitbox = "";
       node.on("mouseleave", function () {
-        //make a conditional to say if the tooltip in focus then dont close
         $hitbox = document.getElementById("hitbox");
-
+        //If the tooltip is in focus then don't remove
         if (!d3.event.toElement.contains($hitbox)) {
-          //the tooltip isn't attache so you lust find a way to grba it and remove ti
           $(".node_tooltip").empty();
           $popover.transition().duration(0).style("opacity", 1e-6);
         }
@@ -951,22 +931,16 @@ function createNodeTree() {
         })
         .style("fill-opacity", 0);
 
-      // phantom node to give us mouseover in a radius around it
+      //Phantom node to give us mouseover in a radius around it
       nodeEnter
         .append("circle")
         .attr("class", "ghostCircle")
         .attr("r", 30)
         .attr("opacity", 0.2) // change this to zero to hide the target area
         .style("fill", "red")
-        .attr("pointer-events", "mouseover")
-        .on("mouseover", function (node) {
-          overCircle(node);
-        })
-        .on("mouseout", function (node) {
-          outCircle(node);
-        });
+        .attr("pointer-events", "mouseover");
 
-      // Update the text to reflect whether node has children or not.
+      //Update the text to reflect whether node has children or not.
       node
         .select("text")
         .attr("x", function (d) {
@@ -979,14 +953,10 @@ function createNodeTree() {
           return d.name;
         });
 
-      // Change the circle fill depending on whether it has children and is collapsed
-      node
-        .select("circle.nodeCircle")
-        //.attr("r", 4.5)
-        .attr("r", 8)
-        .style("fill", colorNode);
+      //Change the circle fill depending on whether it has children and is collapsed
+      node.select("circle.nodeCircle").attr("r", 8).style("fill", colorNode);
 
-      // Transition nodes to their new position.
+      //Transition nodes to their new position.
       var nodeUpdate = node
         .transition()
         .duration(duration)
@@ -994,10 +964,10 @@ function createNodeTree() {
           return "translate(" + d.y + "," + d.x + ")";
         });
 
-      // Fade the text in
+      //Fade the text in
       nodeUpdate.select("text").style("fill-opacity", 1);
 
-      // Transition exiting nodes to the parent's new position.
+      //Transition exiting nodes to the parent's new position.
       var nodeExit = node
         .exit()
         .transition()
@@ -1011,13 +981,13 @@ function createNodeTree() {
 
       nodeExit.select("text").style("fill-opacity", 0);
 
-      // Update the links…
+      //Update the links…
       var link = svgGroup.selectAll("path.link").data(links, function (d) {
         return d.target.id;
       });
 
-      // Enter any new links at the parent's previous position.
-
+      //Calculates if the link has a certain rating for the usage log.
+      //It increases the stroke width according to rating
       link
         .enter()
         .insert("path", "g")
@@ -1048,7 +1018,7 @@ function createNodeTree() {
           });
         });
 
-      // Transition links to their new position.
+      //Transition links to their new position.
       link
         .transition()
         .duration(duration)
@@ -1059,7 +1029,7 @@ function createNodeTree() {
           }
         });
 
-      // Transition exiting nodes to the parent's new position.
+      //Transition exiting nodes to the parent's new position.
       link
         .exit()
         .transition()
@@ -1076,7 +1046,7 @@ function createNodeTree() {
         })
         .remove();
 
-      // Stash the old positions for transition.
+      //Stash the old positions for transition.
       nodes.forEach(function (d) {
         d.x0 = d.x;
         d.y0 = d.y;
@@ -1086,15 +1056,15 @@ function createNodeTree() {
     outer_update = update;
     outer_centerNode = centerNode;
 
-    // Append a group which holds all nodes and which the zoom Listener can act upon.
+    //Append a group which holds all nodes and which the zoom Listener can act upon.
     var svgGroup = baseSvg.append("g");
 
-    // Define the root
+    //Define the root
     root = treeData;
     root.x0 = viewerHeight / 2;
     root.y0 = 0;
 
-    // Layout the tree initially and center on the root node.
+    //Layout the tree initially and center on the root node.
     update(root);
     centerNode(root);
     tree_root = root;
@@ -1104,13 +1074,13 @@ function createNodeTree() {
     select2DataObject = [];
     select2Data
       .sort(function (a, b) {
-        if (a > b) return 1; // sort
+        if (a > b) return 1;
         if (a < b) return -1;
         return 0;
       })
       .filter(function (item, i, ar) {
         return ar.indexOf(item) === i;
-      }) // remove duplicate items
+      }) //Remove duplicate items
       .filter(function (item, i, ar) {
         select2DataObject.push({
           id: i,
@@ -1132,7 +1102,7 @@ function createNodeTree() {
       expandAll(tree_root);
       outer_update(tree_root);
 
-      //initially create the styling for the placeholder
+      //Initially create the styling for the placeholder
       if (!placeholderStyle) {
         placeholderStyle = document.createElement("style");
         placeholderStyle.type = "text/css";
@@ -1140,12 +1110,12 @@ function createNodeTree() {
         color: #222 !important;
       }`;
         document.getElementsByTagName("head")[0].appendChild(placeholderStyle);
-        //if the style element has already bee created then overwrite
+        //If the style element has already bee created then overwrite
       } else {
         placeholderStyle.style.color = "#222 !important";
       }
 
-      //replace and make the placeholder the item name
+      //Replace and make the placeholder the item name
       $select2 = $("#searchName").select2({
         data: select2DataObject,
         containerCssClass: "search",
@@ -1172,7 +1142,7 @@ function createNodeTree() {
           "Search personnel name, site group permission, or site name",
         debug: true,
       });
-      //reset the color but to the placeholder default
+      //Reset the color but to the placeholder default
       if (placeholderStyle) {
         var test = document.getElementsByClassName(
           "select2-selection__placeholder"

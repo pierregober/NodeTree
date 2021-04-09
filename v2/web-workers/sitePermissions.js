@@ -1,6 +1,6 @@
-//******************************************************************************
-//***************      Classification: UNCLASSFIED       ***********************
 /*******************************************************************************
+*****************      Classification: UNCLASSIFIED       **********************
+********************************************************************************
     Author: Pierre Gober, 2021
     Section: IMEF IMO
     Version: 1.0 April 7, 2021
@@ -49,7 +49,7 @@ function getTreeData(cb) {
     ]);
     //Step 1b: Reset the timer to allow the another request to finish
     clearTimeout(timer);
-    timer = setTimeout(completion, 500);
+    timer = setTimeout(completion, 400);
     //Step 2: Interate through that sites subsites (if any)
     e.data.sites.forEach(function (props) {
       sharePointWorker.postMessage({

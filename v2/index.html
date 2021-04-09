@@ -1,26 +1,6 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/styles/select2.min.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/styles/foundation.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/styles/app.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/styles/d3-context-menu.css"
-    />
   </head>
   <body>
     <div class="search-box">
@@ -28,86 +8,34 @@
         <div id="searchName"></div>
       </div>
     </div>
-    <div id="tree-container"></div>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree/formatUsageLog.js"
-    ></script>
-
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/vendors/d3.v3.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/dndTree.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/d3-context-menu.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/vendors/underscore-min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/fastclick.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/vendors/jquery.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/foundation.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/vendors/modernizr.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://intelshare.intelink.gov/sites/imef/imo/StarterSite/SiteAssets/ims/NodeTree%20v2/vendors/select2.min.js"
-    ></script>
     <script>
-      // for the first initialization
-      $("document").ready(function () {
-        $(document).foundation();
-        $(document).on("opened", "[data-reveal]", function () {
-          var element = $(".inputName:visible").first();
-          element.focus(function () {
-            this.selectionStart = this.selectionEnd = this.value.length;
-          });
-          element.focus();
-        });
-        $("#searchName").on("select2-selecting", function (e) {
-          clearAll(tree_root);
-          expandAll(tree_root);
-          outer_update(tree_root);
-
-          searchField = "d.name";
-          searchText = e.object.text;
-          firstCall = true;
-          searchTree(tree_root, firstCall);
-          tree_root.children.forEach(collapseAllNotFound);
-          outer_update(tree_root);
-          tree_root.children.forEach(centerSearchTarget);
-        });
-        function cb(error, props) {
-          if (error) {
-            console.log(error);
-            return;
-          }
-          console.log("information from usagelog:", props);
-          draw_tree(null, props[0]);
-        }
-        formatUsageLog(cb);
-        //var treeJSON = d3.json("tree.json", draw_tree);
-      });
-    </script>
-    <script>
-      $(document).foundation();
+      var n = [
+        123,
+        334,
+        5545,
+        524,
+        2,
+        2,
+        2,
+        2,
+        2333,
+        4434,
+        533,
+        332,
+        223,
+        4445,
+        6667,
+        777,
+        88,
+        9,
+        999,
+        999,
+        99,
+        99,
+        9977,
+        234,
+        234,
+      ];
     </script>
   </body>
 </html>
